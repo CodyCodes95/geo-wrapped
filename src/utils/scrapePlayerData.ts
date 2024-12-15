@@ -61,6 +61,8 @@ const extractNextData = <T>(htmlString: string) => {
 export const scrapeGeoguessrPlayerData = async (userId: string) => {
   const geoguessrUser = await fetch(`https://www.geoguessr.com/user/${userId}`);
   if (!geoguessrUser.ok) {
+    console.log("NOT OKAY");
+    console.log(geoguessrUser.status);
     if (geoguessrUser.status === 404) {
       throw new Error("Invalid Geoguessr user");
     } else {
