@@ -122,9 +122,7 @@ export const guesses = sqliteTable(
     roundId: text("round_id")
       .notNull()
       .references(() => rounds.roundId),
-    userId: text("user_id")
-      .notNull()
-      .references(() => players.playerId),
+    geoguessrId: text("geoguessr_id").notNull(),
     teamId: text("team_id").references(() => teams.teamId),
     lat: real("lat").notNull(),
     lng: real("lng").notNull(),
@@ -140,7 +138,7 @@ export const guesses = sqliteTable(
     }).notNull(),
   },
   (table) => ({
-    userIdIdx: index("guesses_user_id_idx").on(table.userId),
+    userIdIdx: index("guesses_geoguessr_id_idx").on(table.geoguessrId),
     teamIdIdx: index("guesses_team_id_idx").on(table.teamId),
     roundIdIdx: index("guesses_round_id_idx").on(table.roundId),
   }),
@@ -149,7 +147,6 @@ export const guesses = sqliteTable(
 // Relations
 export const playersRelations = relations(players, ({ many }) => ({
   games: many(games, { relationName: "playerGames" }),
-  guesses: many(guesses, { relationName: "playerGuesses" }),
 }));
 
 export const gamesRelations = relations(games, ({ one, many }) => ({
@@ -190,11 +187,6 @@ export const guessesRelations = relations(guesses, ({ one }) => ({
     fields: [guesses.roundId],
     references: [rounds.roundId],
     relationName: "roundGuesses",
-  }),
-  player: one(players, {
-    fields: [guesses.userId],
-    references: [players.playerId],
-    relationName: "playerGuesses",
   }),
   team: one(teams, {
     fields: [guesses.teamId],

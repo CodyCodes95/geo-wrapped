@@ -4,7 +4,6 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "~/components/ui/tabs";
 import { Avatar, AvatarFallback, AvatarImage } from "~/components/ui/avatar";
 import { Globe2, Map, Target, Trophy, Clock } from "lucide-react";
 
-
 const PlayerDashboard = ({ player }: { player: any }) => {
   // This would be replaced with real data
   const demoPlayer = {
