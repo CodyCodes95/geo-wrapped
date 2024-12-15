@@ -22,6 +22,7 @@ export const players = sqliteTable("players", {
     .primaryKey()
     .$defaultFn(() => crypto.randomUUID()),
   dataUrl: text("data_url"),
+  processed: integer("processed", { mode: "boolean" }).notNull().default(false),
   geoguessrId: text("geoguessr_id").notNull(),
   nick: text("nick").notNull(),
   avatarUrl: text("avatar_url").notNull(),
