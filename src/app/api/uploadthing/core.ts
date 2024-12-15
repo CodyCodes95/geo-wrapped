@@ -1,5 +1,5 @@
 /* eslint-disable @typescript-eslint/only-throw-error */
-import { eq, max } from "drizzle-orm";
+import { eq } from "drizzle-orm";
 import { createUploadthing, type FileRouter } from "uploadthing/next";
 import { UploadThingError } from "uploadthing/server";
 import { db } from "~/server/db";
@@ -25,7 +25,9 @@ export const ourFileRouter = {
       }
 
       try {
-        const geoguessrUser = await scrapeGeoguessrPlayerData(file.name);
+        const geoguessrUser = await scrapeGeoguessrPlayerData(
+          file.name.split(".")[0]!,
+        );
         await db.insert(players).values({
           geoguessrId: geoguessrUser.id,
           avatarUrl: geoguessrUser.avatarUrl,
@@ -34,6 +36,7 @@ export const ourFileRouter = {
         });
         return { userId: geoguessrUser.id };
       } catch (error) {
+        console.log(error);
         throw new UploadThingError("Error uploading file");
       }
     })
@@ -46,7 +49,7 @@ export const ourFileRouter = {
       const player = await db
         .update(players)
         .set({ dataUrl: file.url })
-        .where(eq(players.geoguessrId, metadata.userId))
+        .where(eq(players.playerId, metadata.userId))
         .returning({ playerId: players.playerId });
 
       // !!! Whatever is returned here is sent to the clientside `onClientUploadComplete` callback
