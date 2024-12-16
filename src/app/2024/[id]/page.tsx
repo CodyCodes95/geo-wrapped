@@ -22,12 +22,17 @@ export default async function Page({
   if (!player) {
     notFound();
   }
+
+  if (!player.processed) {
+    <p>Processing</p>;
+  }
+
   return (
     <div className="container mx-auto space-y-6 p-6">
       {/* Profile Header */}
       <div className="flex items-center space-x-6 rounded-lg bg-white p-6 shadow-sm">
         <Avatar className="h-24 w-24">
-          <AvatarImage src={player.avatarUrl} alt={player.nick} />
+          <AvatarImage src={player.avatarUrl!} alt={player.nick!} />
           <AvatarFallback>{player.nick}</AvatarFallback>
         </Avatar>
         <div>
@@ -39,7 +44,7 @@ export default async function Page({
       {/* Stats Overview */}
       <div className="grid grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-4">
         <TotalGamesCard />
-        <AverageScoreCard geoGuessrId={player.geoguessrId} />
+        <AverageScoreCard geoGuessrId={player.geoguessrId!} />
         <Card>
           <CardContent className="pt-6">
             <div className="flex items-center space-x-2">

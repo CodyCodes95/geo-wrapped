@@ -23,10 +23,10 @@ export const players = sqliteTable("players", {
     .$defaultFn(() => crypto.randomUUID()),
   dataUrl: text("data_url"),
   processed: integer("processed", { mode: "boolean" }).notNull().default(false),
-  geoguessrId: text("geoguessr_id").notNull(),
-  nick: text("nick").notNull(),
-  avatarUrl: text("avatar_url").notNull(),
-  countryCode: text("country_code").notNull(),
+  geoguessrId: text("geoguessr_id"),
+  nick: text("nick"),
+  avatarUrl: text("avatar_url"),
+  countryCode: text("country_code"),
   createdAt: integer("created_at", { mode: "timestamp" })
     .notNull()
     .default(sql`CURRENT_TIMESTAMP`),
