@@ -4,7 +4,7 @@ import { notFound } from "next/navigation";
 import { Card, CardContent, CardHeader, CardTitle } from "~/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "~/components/ui/tabs";
 import { Avatar, AvatarFallback, AvatarImage } from "~/components/ui/avatar";
-import { Globe2, Map, Target, Trophy, Clock } from "lucide-react";
+import { Globe2 } from "lucide-react";
 import {
   AverageScoreCard,
   FavouriteMapCard,

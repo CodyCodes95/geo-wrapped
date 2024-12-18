@@ -21,6 +21,8 @@ export const env = createEnv({
    */
   client: {
     // NEXT_PUBLIC_CLIENTVAR: z.string(),
+    NEXT_PUBLIC_GOOGLE_API_KEY: z.string(),
+    NEXT_PUBLIC_GOOGLE_MAP_ID: z.string(),
   },
 
   /**
@@ -31,6 +33,8 @@ export const env = createEnv({
     DB_URL: process.env.DB_URL,
     DB_AUTH_TOKEN: process.env.DB_AUTH_TOKEN,
     NODE_ENV: process.env.NODE_ENV,
+    NEXT_PUBLIC_GOOGLE_API_KEY: process.env.NEXT_PUBLIC_GOOGLE_API_KEY,
+    NEXT_PUBLIC_GOOGLE_MAP_ID: process.env.NEXT_PUBLIC_GOOGLE_MAP_ID,
     // NEXT_PUBLIC_CLIENTVAR: process.env.NEXT_PUBLIC_CLIENTVAR,
   },
   /**

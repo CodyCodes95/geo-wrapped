@@ -52,9 +52,6 @@ export const games = sqliteTable(
     gameTimeStarted: integer("game_time_started", {
       mode: "timestamp",
     }).notNull(),
-    gameTimeFinished: integer("game_time_finished", {
-      mode: "timestamp",
-    }).notNull(),
     totalTime: integer("total_time").notNull(),
     mapName: text("map_name").notNull(),
     mapId: text("map_id").notNull(),
@@ -73,15 +70,6 @@ export const games = sqliteTable(
     ),
   }),
 );
-
-// Teams table for duel games
-export const teams = sqliteTable("teams", {
-  teamId: text("team_id").primaryKey(),
-  gameId: text("game_id")
-    .notNull()
-    .references(() => games.gameId),
-  isEnemyTeam: integer("is_enemy_team", { mode: "boolean" }).notNull(),
-});
 
 // Answers table
 export const answers = sqliteTable("answers", {
@@ -114,16 +102,16 @@ export const rounds = sqliteTable(
   }),
 );
 
-// Guesses table
+// Guesses table - now with unique roundId to enforce one-to-one relationship
 export const guesses = sqliteTable(
   "guesses",
   {
     guessId: text("guess_id").primaryKey(),
     roundId: text("round_id")
       .notNull()
+      .unique() // This enforces one guess per round
       .references(() => rounds.roundId),
     geoguessrId: text("geoguessr_id").notNull(),
-    teamId: text("team_id").references(() => teams.teamId),
     lat: real("lat").notNull(),
     lng: real("lng").notNull(),
     countryCode: text("country_code"),
@@ -133,16 +121,17 @@ export const guesses = sqliteTable(
     timeInSeconds: integer("time_in_seconds").notNull(),
     healthBefore: real("health_before"), // Optional for duels
     healthAfter: real("health_after"), // Optional for duels
-    isMainPlayerGuess: integer("is_main_player_guess", {
-      mode: "boolean",
-    }).notNull(),
   },
   (table) => ({
-    userIdIdx: index("guesses_geoguessr_id_idx").on(table.geoguessrId),
-    teamIdIdx: index("guesses_team_id_idx").on(table.teamId),
+    geoguessrIdIdx: index("guesses_geoguessr_id_idx").on(table.geoguessrId),
     roundIdIdx: index("guesses_round_id_idx").on(table.roundId),
   }),
 );
+
+export const failedGameImports = sqliteTable("failed_game_imports", {
+  gameId: text("game_id").primaryKey(),
+  playerId: text("player_id").notNull(),
+});
 
 // Relations
 export const playersRelations = relations(players, ({ many }) => ({
@@ -156,19 +145,9 @@ export const gamesRelations = relations(games, ({ one, many }) => ({
     relationName: "playerGames",
   }),
   rounds: many(rounds, { relationName: "gameRounds" }),
-  teams: many(teams, { relationName: "gameTeams" }),
 }));
 
-export const teamsRelations = relations(teams, ({ one, many }) => ({
-  game: one(games, {
-    fields: [teams.gameId],
-    references: [games.gameId],
-    relationName: "gameTeams",
-  }),
-  guesses: many(guesses, { relationName: "teamGuesses" }),
-}));
-
-export const roundsRelations = relations(rounds, ({ one, many }) => ({
+export const roundsRelations = relations(rounds, ({ one }) => ({
   game: one(games, {
     fields: [rounds.gameId],
     references: [games.gameId],
@@ -179,19 +158,16 @@ export const roundsRelations = relations(rounds, ({ one, many }) => ({
     references: [answers.answerId],
     relationName: "roundAnswer",
   }),
-  guesses: many(guesses, { relationName: "roundGuesses" }),
+  guess: one(guesses, {
+    fields: [rounds.roundId],
+    references: [guesses.roundId],
+  }),
 }));
 
 export const guessesRelations = relations(guesses, ({ one }) => ({
   round: one(rounds, {
     fields: [guesses.roundId],
     references: [rounds.roundId],
-    relationName: "roundGuesses",
-  }),
-  team: one(teams, {
-    fields: [guesses.teamId],
-    references: [teams.teamId],
-    relationName: "teamGuesses",
   }),
 }));
 
