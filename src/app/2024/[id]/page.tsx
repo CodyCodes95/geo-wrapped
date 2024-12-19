@@ -19,6 +19,14 @@ export default async function Page({
   const id = (await params).id;
   const player = await api.players.getPlayer({ id });
 
+  function getFlagEmoji(countryCode: string) {
+    const codePoints = countryCode
+      .toUpperCase()
+      .split("")
+      .map((char) => 127397 + char.charCodeAt(0));
+    return String.fromCodePoint(...codePoints);
+  }
+
   if (!player) {
     notFound();
   }
@@ -37,7 +45,9 @@ export default async function Page({
         </Avatar>
         <div>
           <h1 className="text-3xl font-bold">{player.nick}</h1>
-          <p className="text-gray-600">{player.countryCode}</p>
+          <p className="text-gray-600">
+            {getFlagEmoji(player?.countryCode ?? "")}
+          </p>
         </div>
       </div>
 

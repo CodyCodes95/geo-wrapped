@@ -1,5 +1,6 @@
 import { motion } from "framer-motion";
-import { YearStats } from "../types/stats";
+import { type YearStats } from "../types/stats";
+import Link from "next/link";
 
 interface Props {
   stats: YearStats;
@@ -42,15 +43,15 @@ export const SummarySlide = ({ stats }: Props) => (
         <p className="text-gray-400">{stats.moods[0].percentage}% of tracks</p>
       </div>
     </motion.div>
-
-    <motion.button
-      initial={{ opacity: 0, y: 20 }}
-      animate={{ opacity: 1, y: 0 }}
-      transition={{ delay: 0.3 }}
-      className="rounded-full bg-green-400 px-8 py-4 font-bold text-black transition-colors hover:bg-green-500"
-      onClick={() => (window.location.href = "/dashboard")}
-    >
-      View Full Stats Dashboard
-    </motion.button>
+    <Link href=".">
+      <motion.button
+        initial={{ opacity: 0, y: 20 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ delay: 0.3 }}
+        className="rounded-full bg-green-400 px-8 py-4 font-bold text-black transition-colors hover:bg-green-500"
+      >
+        View Full Stats Dashboard
+      </motion.button>
+    </Link>
   </div>
 );
