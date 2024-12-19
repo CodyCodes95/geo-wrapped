@@ -8,9 +8,7 @@ type ClientOnlyProps = {
 const ClientOnly = ({ children }: ClientOnlyProps) => {
   const [client, setClient] = useState(false);
   useEffect(() => {
-    if (typeof window !== "undefined") {
-      setClient(true);
-    }
+    setClient(true);
   }, []);
 
   if (!client) return null;
