@@ -1,32 +1,41 @@
 "use client";
-import React, { useCallback, useEffect, useMemo, useState } from "react";
-import {
-  APIProvider,
-  Map as GoogleMap,
-  useMap,
-} from "@vis.gl/react-google-maps";
+import React from "react";
+import { APIProvider, Map as GoogleMap } from "@vis.gl/react-google-maps";
 import { env } from "~/env";
-import { type Marker, MarkerClusterer } from "@googlemaps/markerclusterer";
-import ClusteredMarkers from "./ClusteredMarkers";
+import { type players } from "~/server/db/schema";
+import { api } from "~/trpc/react";
+import { ClusteredMarkers } from "./ClusteredMarkers";
 
-type Location = { lng: number; lat: number; id: string };
-
-type MapProps = {
-  locations: Location[];
+export type Location = {
+  location: {
+    lng: number;
+    lat: number;
+  };
+  key: string;
 };
 
-const Map = ({ locations }: MapProps) => {
+type MapProps = {
+  player: typeof players.$inferInsert;
+};
+
+console.log(env.NEXT_PUBLIC_GOOGLE_API_KEY);
+
+const Map = ({ player }: MapProps) => {
+  const { data: guesses } = api.guesses.getAll.useQuery(
+    { geoGuessrId: player.geoguessrId! },
+    { enabled: !!player?.geoguessrId },
+  );
   return (
     <APIProvider apiKey={env.NEXT_PUBLIC_GOOGLE_API_KEY}>
       <GoogleMap
         mapId={env.NEXT_PUBLIC_GOOGLE_MAP_ID}
-        style={{ width: "100vw", height: "100vh" }}
+        style={{ width: "100%", height: "100vh" }}
         defaultCenter={{ lat: 22.54992, lng: 0 }}
         defaultZoom={3}
         gestureHandling={"greedy"}
         disableDefaultUI={true}
       >
-        <ClusteredMarkers locations={locations} />
+        {guesses && <ClusteredMarkers locations={guesses} />}
       </GoogleMap>
     </APIProvider>
   );

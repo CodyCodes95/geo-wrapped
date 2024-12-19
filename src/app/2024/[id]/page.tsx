@@ -10,6 +10,7 @@ import {
   FavouriteMapCard,
   TotalGamesCard,
 } from "./_components/SummaryCards";
+import Map from "./_components/map/Map";
 
 export default async function Page({
   params,
@@ -38,7 +39,7 @@ export default async function Page({
   return (
     <div className="container mx-auto space-y-6 p-6">
       {/* Profile Header */}
-      <div className="flex items-center space-x-6 rounded-lg bg-white p-6 shadow-sm">
+      <div className="flex items-center space-x-6 rounded-lg p-6 shadow-sm">
         <Avatar className="h-24 w-24">
           <AvatarImage src={player.avatarUrl!} alt={player.nick!} />
           <AvatarFallback>{player.nick}</AvatarFallback>
@@ -81,13 +82,10 @@ export default async function Page({
         <TabsContent value="overview" className="space-y-4">
           <Card>
             <CardHeader>
-              <CardTitle>Performance Overview</CardTitle>
+              <CardTitle>Your guesses</CardTitle>
             </CardHeader>
             <CardContent>
-              {/* Add charts/stats here */}
-              <div className="flex h-[200px] items-center justify-center rounded border">
-                Performance Chart Placeholder
-              </div>
+              <Map player={player} />
             </CardContent>
           </Card>
         </TabsContent>

@@ -15,4 +15,22 @@ export const guessRouter = createTRPCRouter({
 
       return Math.round(Number(query[0]?.scoreAverage) ?? 0);
     }),
+  getAll: publicProcedure
+    .input(z.object({ geoGuessrId: z.string() }))
+    .query(async ({ input, ctx }) => {
+      const query = await ctx.db
+        .select({
+          points: guesses.points,
+          lat: guesses.lat,
+          lng: guesses.lng,
+          id: guesses.guessId,
+        })
+        .from(guesses)
+        .where(eq(guesses.geoguessrId, input.geoGuessrId));
+
+      return query.map((row) => ({
+        location: { lng: row.lng, lat: row.lat },
+        key: row.id,
+      }));
+    }),
 });

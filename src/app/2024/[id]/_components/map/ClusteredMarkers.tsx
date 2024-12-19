@@ -1,32 +1,31 @@
-"use client";
+import { InfoWindow, useMap } from "@vis.gl/react-google-maps";
 import React, { useCallback, useEffect, useMemo, useState } from "react";
-import {
-  InfoWindow,
-  Marker,
-  useMap,
-} from "@vis.gl/react-google-maps";
-import { type Marker as MarkerType, MarkerClusterer } from "@googlemaps/markerclusterer";
+import { type Marker, MarkerClusterer } from "@googlemaps/markerclusterer";
+import { type Location } from "./Map";
+import { LocationMarker } from "./Marker";
 
-type Location = { lng: number; lat: number; id: string };
-
-type MapProps = {
+export type ClusteredMarkersProps = {
   locations: Location[];
 };
 
-const ClusteredMarkers = ({ locations }: MapProps) => {
-  const [markers, setMarkers] = useState<Record<string, MarkerType>>({});
-  const [selectedLocationId, setSelectedLocationId] = useState<string | null>(
-    null,
-  );
+/**
+ * The ClusteredMarkers component is responsible for integrating the
+ * markers with the markerclusterer.
+ */
+export const ClusteredMarkers = ({ locations }: ClusteredMarkersProps) => {
+  const [markers, setMarkers] = useState<Record<string, Marker>>({});
+  const [selectedTreeKey, setSelectedTreeKey] = useState<string | null>(null);
 
-  const selectedLocation = useMemo(
+  const selectedTree = useMemo(
     () =>
-      locations && selectedLocationId
-        ? locations.find((l) => l.id === selectedLocationId)!
+      locations && selectedTreeKey
+        ? locations.find((t) => t.key === selectedTreeKey)!
         : null,
-    [locations, selectedLocationId],
+    [locations, selectedTreeKey],
   );
 
+  // create the markerClusterer once the map is available and update it when
+  // the markers are changed
   const map = useMap();
   const clusterer = useMemo(() => {
     if (!map) return null;
@@ -43,7 +42,7 @@ const ClusteredMarkers = ({ locations }: MapProps) => {
 
   // this callback will effectively get passsed as ref to the markers to keep
   // tracks of markers currently on the map
-  const setMarkerRef = useCallback((marker: MarkerType | null, key: string) => {
+  const setMarkerRef = useCallback((marker: Marker | null, key: string) => {
     setMarkers((markers) => {
       if ((marker && markers[key]) || (!marker && !markers[key]))
         return markers;
@@ -59,33 +58,32 @@ const ClusteredMarkers = ({ locations }: MapProps) => {
   }, []);
 
   const handleInfoWindowClose = useCallback(() => {
-    setSelectedLocationId(null);
+    setSelectedTreeKey(null);
   }, []);
 
-  const handleMarkerClick = useCallback((loc: Location) => {
-    setSelectedLocationId(loc.id);
+  const handleMarkerClick = useCallback((location: Location) => {
+    setSelectedTreeKey(location.key);
   }, []);
 
   return (
     <>
       {locations.map((location) => (
-        <Marker
-          key={location.id}
-          position={{ lat: location.lat, lng: location.lng }}
-          onClick={() => handleMarkerClick(location)}
+        <LocationMarker
+          key={location.key}
+          location={location}
+          onClick={handleMarkerClick}
+          setMarkerRef={setMarkerRef}
         />
       ))}
 
-      {selectedLocationId && (
+      {selectedTreeKey && (
         <InfoWindow
-          anchor={markers[selectedLocationId]}
+          anchor={markers[selectedTreeKey]}
           onCloseClick={handleInfoWindowClose}
         >
-          Selected!
+          {selectedTree?.key}
         </InfoWindow>
       )}
     </>
   );
 };
-
-export default ClusteredMarkers;
