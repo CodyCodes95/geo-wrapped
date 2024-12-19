@@ -1,4 +1,4 @@
-import { avg, eq } from "drizzle-orm";
+import { and, avg, eq, not } from "drizzle-orm";
 import { z } from "zod";
 
 import { createTRPCRouter, publicProcedure } from "~/server/api/trpc";
@@ -26,7 +26,13 @@ export const guessRouter = createTRPCRouter({
           id: guesses.guessId,
         })
         .from(guesses)
-        .where(eq(guesses.geoguessrId, input.geoGuessrId));
+        .where(
+          and(
+            eq(guesses.geoguessrId, input.geoGuessrId),
+            not(eq(guesses.lat, 0)),
+            not(eq(guesses.lng, 0)),
+          ),
+        );
 
       return query.map((row) => ({
         location: { lng: row.lng, lat: row.lat },
