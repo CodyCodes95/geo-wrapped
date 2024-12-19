@@ -33,7 +33,6 @@ export const guessRouter = createTRPCRouter({
             not(eq(guesses.lng, 0)),
           ),
         );
-
       return query.map((row) => ({
         location: { lng: row.lng, lat: row.lat },
         key: row.id,
