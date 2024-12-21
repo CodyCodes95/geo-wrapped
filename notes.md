@@ -22,12 +22,14 @@ your hardest countries
 your favourite gamemode
 
 best guesses and stats:
-highlight 5ks
+highlight 5k score guesses
 highlight 0 score guesses
-show panos? 
 average guess time
 average score
 average distance in km from answer
+
+misc:
+show panos?
 
 Summary:
 total minutes played
