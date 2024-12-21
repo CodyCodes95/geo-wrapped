@@ -10,7 +10,7 @@ export const WelcomeSlide = () => (
       Your 2023 in Music
     </h1>
     <div className="mt-4 text-xl text-green-400">
-      Let's explore your musical journey
+      {/* Let's explore your musical journey */}
     </div>
     <motion.div
       initial={{ opacity: 0, y: 20 }}
