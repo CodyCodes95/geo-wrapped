@@ -5,6 +5,7 @@ import {
   count,
   desc,
   eq,
+  gte,
   isNotNull,
   not,
   sql,
@@ -17,6 +18,83 @@ import { answers, games, guesses, rounds } from "~/server/db/schema";
 import { countryCodes } from "~/utils/countryCodes";
 
 export const wrappedRouter = createTRPCRouter({
+  totalGamesSummary: publicProcedure
+    .input(z.object({ playerId: z.string() }))
+    .query(async ({ input, ctx }) => {
+      const { playerId } = input;
+
+      const totalSummaryQuery = ctx.db
+        .select({
+          totalGamesPlayed: count(games.gameId),
+          totalMinutesPlayed: sum(games.totalTime),
+        })
+        .from(games)
+        .where(eq(games.playerId, playerId));
+
+      const favouriteMapQuery = ctx.db
+        .select({
+          mapName: games.mapName,
+          gamesPlayed: count(games.gameId),
+        })
+        .from(games)
+        .where(eq(games.playerId, playerId))
+        .groupBy(games.mapName)
+        .orderBy(desc(count(games.gameId)))
+        .limit(1);
+
+      const favouriteModeQuery = ctx.db
+        .select({
+          mode: games.mode,
+          gamesPlayed: count(games.gameId),
+        })
+        .from(games)
+        .where(eq(games.playerId, playerId))
+        .groupBy(games.mode)
+        .orderBy(desc(count(games.mode)))
+        .limit(1);
+
+      const [totalSummary, favouriteMap, favouriteMode] = await Promise.all([
+        totalSummaryQuery,
+        favouriteMapQuery,
+        favouriteModeQuery,
+      ]);
+
+      if (
+        !favouriteMap.length ||
+        !favouriteMode.length ||
+        !totalSummary.length
+      ) {
+        throw new Error("Bad data");
+      }
+
+      return {
+        totalGamesPlayed: Number(totalSummary[0]!.totalGamesPlayed),
+        totalMinutesPlayed: Number(totalSummary[0]!.totalMinutesPlayed),
+        favouriteMap: favouriteMap[0]!.mapName,
+        favouriteMapGamesPlayed: favouriteMap[0]!.gamesPlayed,
+        favouriteMode: favouriteMode[0]!.mode,
+      };
+    }),
+  bestGames: publicProcedure
+    .input(z.object({ playerId: z.string() }))
+    .query(async ({ input, ctx }) => {
+      const { playerId } = input;
+      // First get the top map by games played
+      const bestGames = await ctx.db
+        .select({
+          gameMode: games.mode,
+          points: games.totalPoints,
+          mapName: games.mapName,
+          summaryId: games.gameId,
+        })
+        .from(games)
+        .where(and(eq(games.playerId, playerId), isNotNull(games.totalPoints)))
+        .orderBy(desc(games.totalPoints))
+        .limit(3);
+
+      return bestGames;
+    }),
+
   topMap: publicProcedure
     .input(z.object({ playerId: z.string() }))
     .query(async ({ input, ctx }) => {
@@ -92,6 +170,16 @@ export const wrappedRouter = createTRPCRouter({
           country: answers.countryCode,
           correctGuesses: sql<number>`count(case when ${answers.countryCode} = ${guesses.countryCode} then 1 end)`,
           totalGuesses: count(answers.answerId),
+          percentage: sql<number>`ROUND(CAST(COUNT(CASE WHEN ${answers.countryCode} = ${guesses.countryCode} THEN 1 END) AS FLOAT) / COUNT(*) * 100, 2)`,
+          score: sql<number>`(
+          CAST(COUNT(CASE WHEN ${answers.countryCode} = ${guesses.countryCode} THEN 1 END) AS FLOAT) / COUNT(*)
+        ) + (
+          CASE 
+            WHEN COUNT(CASE WHEN ${answers.countryCode} = ${guesses.countryCode} THEN 1 END) = 0 
+            THEN -1.0 * COUNT(*) / 100.0
+            ELSE 0 
+          END
+        )`,
         })
         .from(answers)
         .innerJoin(rounds, eq(rounds.answerId, answers.answerId))
@@ -107,11 +195,18 @@ export const wrappedRouter = createTRPCRouter({
         .groupBy(answers.countryCode)
         .orderBy(
           desc(
-            sql`count(case when ${answers.countryCode} = ${guesses.countryCode} then 1 end)`,
+            sql<number>`(
+          CAST(COUNT(CASE WHEN ${answers.countryCode} = ${guesses.countryCode} THEN 1 END) AS FLOAT) / COUNT(*)
+        ) + (
+          CASE 
+            WHEN COUNT(CASE WHEN ${answers.countryCode} = ${guesses.countryCode} THEN 1 END) = 0 
+            THEN -1.0 * COUNT(*) / 100.0
+            ELSE 0 
+          END
+        )`,
           ),
         )
         .limit(4);
-
       return query;
     }),
 
@@ -131,11 +226,21 @@ export const wrappedRouter = createTRPCRouter({
         ],
         sql` OR `,
       );
-      return ctx.db
+      const query = await ctx.db
         .select({
           country: answers.countryCode,
           correctGuesses: sql<number>`count(case when ${answers.countryCode} = ${guesses.countryCode} then 1 end)`,
           totalGuesses: count(answers.answerId),
+          percentage: sql<number>`ROUND(CAST(COUNT(CASE WHEN ${answers.countryCode} = ${guesses.countryCode} THEN 1 END) AS FLOAT) / COUNT(*) * 100, 2)`,
+          score: sql<number>`(
+          CAST(COUNT(CASE WHEN ${answers.countryCode} = ${guesses.countryCode} THEN 1 END) AS FLOAT) / COUNT(*)
+        ) + (
+          CASE 
+            WHEN COUNT(CASE WHEN ${answers.countryCode} = ${guesses.countryCode} THEN 1 END) = 0 
+            THEN -1.0 * COUNT(*) / 100.0
+            ELSE 0 
+          END
+        )`,
         })
         .from(answers)
         .innerJoin(rounds, eq(rounds.answerId, answers.answerId))
@@ -151,9 +256,18 @@ export const wrappedRouter = createTRPCRouter({
         .groupBy(answers.countryCode)
         .orderBy(
           asc(
-            sql<number>`count(case when ${answers.countryCode} = ${guesses.countryCode} then 1 end)`,
+            sql<number>`(
+          CAST(COUNT(CASE WHEN ${answers.countryCode} = ${guesses.countryCode} THEN 1 END) AS FLOAT) / COUNT(*)
+        ) + (
+          CASE 
+            WHEN COUNT(CASE WHEN ${answers.countryCode} = ${guesses.countryCode} THEN 1 END) = 0 
+            THEN -1.0 * COUNT(*) / 100.0
+            ELSE 0 
+          END
+        )`,
           ),
         )
         .limit(4);
+      return query;
     }),
 });

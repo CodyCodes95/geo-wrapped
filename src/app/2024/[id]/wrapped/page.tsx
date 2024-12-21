@@ -1,7 +1,21 @@
 import { api } from "~/trpc/server";
 import Wrapped from "./components/Wrapped";
+import { notFound } from "next/navigation";
 
 export type WrappedStats = {
+  totalStats: {
+    totalGamesPlayed: number;
+    totalMinutesPlayed: number;
+    favouriteMap: string;
+    favouriteMode: string;
+    favouriteMapGamesPlayed: number;
+  };
+  bestGames: {
+    gameMode: string;
+    points: number | null;
+    mapName: string;
+    summaryId: string;
+  }[];
   topGenre: {
     name: string;
     hours: number;
@@ -48,12 +62,22 @@ export default async function Page({
   params: Promise<{ id: string }>;
 }) {
   const id = (await params).id;
+  const player = await api.players.getPlayer({ id });
+
+  if (!player) {
+    notFound();
+  }
+
   const strongestCountries = await api.wrapped.strongestCountries({
     playerId: id,
   });
   const weakestCountries = await api.wrapped.weakestCountries({ playerId: id });
+  const totalStats = await api.wrapped.totalGamesSummary({ playerId: id });
   const topMap = await api.wrapped.topMap({ playerId: id });
+  const bestGames = await api.wrapped.bestGames({ playerId: id });
   const stats: WrappedStats = {
+    totalStats,
+    bestGames,
     topMap,
     strongestCountries,
     weakestCountries,
