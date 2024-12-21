@@ -45,14 +45,17 @@ const ThailandRegionCard = () => {
         <div>
           <h3 className="mb-2 text-lg font-semibold">MooDeng Breakdown</h3>
           <ul className="flex flex-col gap-2">
-            <li>
-              {"5k's"} in Thailand: {guesses?.fiveK?.length ?? 0}
+            <li className="flex w-full items-center justify-between">
+              <span>{"5k's"} in Thailand:</span>
+              <span className="text-primary">{guesses?.fiveK?.length ?? 0}</span>
             </li>
-            <li>
-              Thailand guesses within 50km: {guesses?.fiftyKm?.length ?? 0}
+            <li className="flex w-full items-center justify-between">
+              <span>Thailand guesses within 50km:</span>
+              <span className="text-primary">{guesses?.fiftyKm?.length ?? 0}</span>
             </li>
-            <li>
-              Thailand guesses within 100km: {guesses?.hundredKm?.length ?? 0}
+            <li className="flex w-full items-center justify-between">
+              <span>Thailand guesses within 100km:</span>
+              <span className="text-primary">{guesses?.hundredKm?.length ?? 0}</span>
             </li>
           </ul>
         </div>
@@ -131,9 +134,18 @@ const MooDengDetail = ({
     <div>
       <h3 className="mb-2 text-lg font-semibold">MooDeng Breakdown</h3>
       <ul className="flex flex-col gap-2">
-        <li>Guesses on Moo Deng: {guesses}</li>
-        <li>Guesses within 10km of Moo Deng: {tenKm}</li>
-        <li>Guesses within 50km of Moo Deng: {fiftyKm}</li>
+        <li className="flex w-full items-center justify-between">
+          <span>Guesses on Moo Deng:</span>
+          <span className="text-primary">{guesses}</span>
+        </li>
+        <li className="flex w-full items-center justify-between">
+          <span>Guesses within 10km of Moo Deng:</span>
+          <span className="text-primary">{tenKm}</span>
+        </li>
+        <li className="flex w-full items-center justify-between">
+          <span>Guesses within 50km of Moo Deng:</span>
+          <span className="text-primary">{fiftyKm}</span>
+        </li>
       </ul>
     </div>
   );
@@ -195,9 +207,15 @@ export const ObamaDetail = ({ guessesInObama }: { guessesInObama: number }) => {
   return (
     <div>
       <h3 className="mb-2 text-lg font-semibold">Obama Breakdown</h3>
-      <ul className="space-y-1">
-        <li>Rounds in obama: {roundsInObama}</li>
-        <li>Guesses in Obama: {guessesInObama}</li>
+      <ul className="flex flex-col gap-2">
+        <li className="flex w-full items-center justify-between">
+          <span>Rounds in obama:</span>
+          <span className="text-primary">{roundsInObama}</span>
+        </li>
+        <li className="flex w-full items-center justify-between">
+          <span>Guesses in Obama:</span>
+          <span className="text-primary">{guessesInObama}</span>
+        </li>
         <li className="rounded-md bg-primary p-2 text-center">
           {guessesInObama > (roundsInObama ?? 0)
             ? "You made more Obama guesses than rounds in Obama. Good job"
@@ -328,10 +346,11 @@ export const FavouriteMapCard = () => {
       detailedContent={
         <div>
           <h3 className="mb-2 text-lg font-semibold">Top maps</h3>
-          <ul className="space-y-1">
+          <ul className="flex flex-col gap-2">
             {maps?.map((map) => (
-              <li key={map.mapName}>
-                {map.mapName}: {map.count}
+              <li key={map.mapName} className="flex w-full items-center justify-between">
+                <span>{map.mapName}:</span>
+                <span className="text-primary">{map.count}</span>
               </li>
             ))}
           </ul>
@@ -355,10 +374,11 @@ export const TopCountryCard = () => {
       detailedContent={
         <div>
           <h3 className="mb-2 text-lg font-semibold">Top countries</h3>
-          <ul className="space-y-1">
+          <ul className="flex flex-col gap-2">
             {topCountries?.map((country) => (
-              <li key={country.country}>
-                {getCountryFlagEmoji(country.country)}: {country.count}
+              <li key={country.country} className="flex w-full items-center justify-between">
+                <span>{getCountryFlagEmoji(country.country)}:</span>
+                <span className="text-primary">{country.count}</span>
               </li>
             ))}
           </ul>
