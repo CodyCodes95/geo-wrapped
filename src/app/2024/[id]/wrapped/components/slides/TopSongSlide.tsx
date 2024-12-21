@@ -1,5 +1,5 @@
 import { motion } from "framer-motion";
-import { YearStats } from "../types/stats";
+import { type YearStats } from "../Wrapped";
 
 interface Props {
   stats: YearStats;
@@ -37,7 +37,7 @@ export const TopSongSlide = ({ stats }: Props) => (
       transition={{ delay: 0.3 }}
       className="text-xl text-gray-400"
     >
-      That's {stats.topSong.minutes} minutes of pure electronic bliss!
+      {/* That's {stats.topSong.minutes} minutes of pure electronic bliss! */}
     </motion.div>
   </div>
 );
