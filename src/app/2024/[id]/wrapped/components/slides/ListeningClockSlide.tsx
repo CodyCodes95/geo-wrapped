@@ -36,7 +36,7 @@ export const ListeningClockSlide = ({ stats }: Props) => (
         >
           <div className="mb-2 text-2xl">{stats.listeningClock.type}</div>
           <div className="text-gray-400">
-            You're most active during late hours
+            {/* You're most active during late hours */}
           </div>
         </motion.div>
 

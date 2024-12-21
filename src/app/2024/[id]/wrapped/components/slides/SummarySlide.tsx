@@ -1,5 +1,6 @@
 import { motion } from "framer-motion";
-import { type YearStats } from "../types/stats";
+import { YearStats } from "../Wrapped";
+
 import Link from "next/link";
 
 interface Props {
@@ -39,8 +40,8 @@ export const SummarySlide = ({ stats }: Props) => (
 
       <div className="rounded-lg bg-[#282828] p-6">
         <h3 className="mb-2 text-xl text-green-400">Dominant Mood</h3>
-        <p className="text-2xl font-bold text-white">{stats.moods[0].name}</p>
-        <p className="text-gray-400">{stats.moods[0].percentage}% of tracks</p>
+        {/* <p className="text-2xl font-bold text-white">{stats.moods[0].name}</p> */}
+        {/* <p className="text-gray-400">{stats.moods[0].percentage}% of tracks</p> */}
       </div>
     </motion.div>
     <Link href=".">
