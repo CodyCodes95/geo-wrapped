@@ -95,6 +95,10 @@ export const RecapSlide = ({ stats }: Props) => {
   );
 };
 
+export const ScoreSlide = ({ stats }: Props) => {
+  return void 1;
+};
+
 export const WeakestCountries = ({ stats }: Props) => (
   <div className="flex min-h-screen flex-col items-center justify-center gap-4 bg-[#191414]">
     <h1 className="bg bg-clip-text text-4xl font-bold text-primary">
