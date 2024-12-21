@@ -2,11 +2,14 @@
 import React, { useEffect, useState } from "react";
 import { AnimatePresence, motion } from "framer-motion";
 import { WelcomeSlide } from "./slides/WelcomeSlide";
-import { TopGenreSlide } from "./slides/TopMapSlide";
 import { ListeningClockSlide } from "./slides/ListeningClockSlide";
 import { TopSongSlide } from "./slides/TopSongSlide";
 import { SummarySlide } from "./slides/SummarySlide";
-import { StrongestCountries, WeakestCountries } from "./Slides";
+import {
+  FavouriteMapSlide,
+  StrongestCountries,
+  WeakestCountries,
+} from "./Slides";
 import { type WrappedStats } from "../page";
 
 export type YearStats = {
@@ -95,7 +98,7 @@ export const yearStats: YearStats = {
 
 const slides = [
   WelcomeSlide,
-  TopGenreSlide,
+  FavouriteMapSlide,
   ListeningClockSlide,
   StrongestCountries,
   WeakestCountries,

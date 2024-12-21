@@ -1,4 +1,4 @@
-const countryCodes = {
+export const countryCodes = {
   AF: "Afghanistan",
   AX: "Aland Islands",
   AL: "Albania",
@@ -180,7 +180,7 @@ const countryCodes = {
   QA: "Qatar",
   RE: "Reunion",
   RO: "Romania",
-  RU: "Russian Federation",
+  RU: "Russia",
   RW: "Rwanda",
   BL: "Saint Barthelemy",
   SH: "Saint Helena",

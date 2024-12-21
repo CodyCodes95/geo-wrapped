@@ -16,7 +16,7 @@ export type WrappedStats = {
       gameMode: string;
       points: number;
       summaryUrl: string;
-    };
+    }[];
   };
   listeningClock: {
     peakHour: string;
@@ -48,11 +48,13 @@ export default async function Page({
   params: Promise<{ id: string }>;
 }) {
   const id = (await params).id;
-  const strongestCountries = await api.guesses.strongestCountries({
+  const strongestCountries = await api.wrapped.strongestCountries({
     playerId: id,
   });
-  const weakestCountries = await api.guesses.weakestCountries({ playerId: id });
+  const weakestCountries = await api.wrapped.weakestCountries({ playerId: id });
+  const topMap = await api.wrapped.topMap({ playerId: id });
   const stats: WrappedStats = {
+    topMap,
     strongestCountries,
     weakestCountries,
     topGenre: {

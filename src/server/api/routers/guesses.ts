@@ -6,9 +6,12 @@ import {
   desc,
   eq,
   gte,
+  ilike,
+  like,
   lte,
   ne,
   not,
+  notIlike,
   sql,
 } from "drizzle-orm";
 import { z } from "zod";
@@ -16,6 +19,7 @@ import { z } from "zod";
 import { createTRPCRouter, publicProcedure } from "~/server/api/trpc";
 import { answers, games, guesses, rounds } from "~/server/db/schema";
 import { getMonthTimestampRange } from "~/utils";
+import { countryCodes, getCountryName } from "~/utils/countryCodes";
 
 const moodengCenter = {
   lat: 13.216247039443203,
@@ -335,6 +339,18 @@ export const guessRouter = createTRPCRouter({
     .input(z.object({ playerId: z.string() }))
     .query(async ({ input, ctx }) => {
       const { playerId } = input;
+      // Create an array of conditions for each country code and its name
+      const countryExclusions = sql.join(
+        [
+          ...Object.entries(countryCodes).map(
+            ([code, name]) =>
+              sql`(${answers.countryCode} = ${code.toLowerCase()} AND LOWER(${games.mapName}) NOT LIKE ${`%${name.toLowerCase()}%`})`,
+          ),
+          sql`(${answers.countryCode} = 'us' AND LOWER(${games.mapName}) NOT LIKE ${`%$us%`})`,
+          sql`(${answers.countryCode} = 'us' AND LOWER(${games.mapName}) NOT LIKE ${`%$u.s%`})`,
+        ],
+        sql` OR `,
+      );
       const query = await ctx.db
         .select({
           country: answers.countryCode,
@@ -349,6 +365,7 @@ export const guessRouter = createTRPCRouter({
           and(
             eq(games.playerId, playerId),
             not(eq(answers.countryCode, "Unknown")),
+            sql`${countryExclusions}`,
           ),
         )
         .groupBy(answers.countryCode)
@@ -358,6 +375,7 @@ export const guessRouter = createTRPCRouter({
           ),
         )
         .limit(4);
+
       return query;
     }),
 
@@ -365,6 +383,18 @@ export const guessRouter = createTRPCRouter({
     .input(z.object({ playerId: z.string() }))
     .query(async ({ input, ctx }) => {
       const { playerId } = input;
+      // Create an array of conditions for each country code and its name
+      const countryExclusions = sql.join(
+        [
+          ...Object.entries(countryCodes).map(
+            ([code, name]) =>
+              sql`(${answers.countryCode} = ${code.toLowerCase()} AND LOWER(${games.mapName}) NOT LIKE ${`%${name.toLowerCase()}%`})`,
+          ),
+          sql`(${answers.countryCode} = 'us' AND LOWER(${games.mapName}) NOT LIKE ${`%$us%`})`,
+          sql`(${answers.countryCode} = 'us' AND LOWER(${games.mapName}) NOT LIKE ${`%$u.s%`})`,
+        ],
+        sql` OR `,
+      );
       return ctx.db
         .select({
           country: answers.countryCode,
@@ -379,6 +409,7 @@ export const guessRouter = createTRPCRouter({
           and(
             eq(games.playerId, playerId),
             not(eq(answers.countryCode, "Unknown")),
+            sql`${countryExclusions}`,
           ),
         )
         .groupBy(answers.countryCode)
