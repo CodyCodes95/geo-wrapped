@@ -3,6 +3,7 @@ import { z } from "zod";
 
 import { createTRPCRouter, publicProcedure } from "~/server/api/trpc";
 import { answers, games, guesses, rounds } from "~/server/db/schema";
+import { getMonthTimestampRange } from "~/utils";
 
 const moodengCenter = {
   lat: 13.216247039443203,
@@ -66,8 +67,10 @@ function calculateBoundingBox(lat: number, lng: number, radiusKm: number) {
 
 export const guessRouter = createTRPCRouter({
   getAverageScore: publicProcedure
-    .input(z.object({ playerId: z.string() }))
+    .input(z.object({ playerId: z.string(), selectedMonth: z.string() }))
     .query(async ({ input, ctx }) => {
+      const { start, end } = getMonthTimestampRange(input.selectedMonth);
+
       const query = await ctx.db
         .select({
           scoreAverage: avg(guesses.points),
@@ -75,41 +78,62 @@ export const guessRouter = createTRPCRouter({
         .from(guesses)
         .innerJoin(rounds, eq(guesses.roundId, rounds.roundId))
         .innerJoin(games, eq(rounds.gameId, games.gameId))
-        .where(eq(games.playerId, input.playerId));
+        .where(
+          and(
+            eq(games.playerId, input.playerId),
+            gte(games.gameTimeStarted, start),
+            lte(games.gameTimeStarted, end),
+          ),
+        );
 
       return Math.round(Number(query[0]?.scoreAverage) ?? 0);
     }),
   fiveKGuesses: publicProcedure
-    .input(z.object({ playerId: z.string() }))
+    .input(z.object({ playerId: z.string(), selectedMonth: z.string() }))
     .query(async ({ input, ctx }) => {
+      const { start, end } = getMonthTimestampRange(input.selectedMonth);
       const query = await ctx.db
         .select({
           count: count(guesses.guessId),
         })
         .from(guesses)
         .where(
-          and(eq(games.playerId, input.playerId), eq(guesses.points, 5000)),
+          and(
+            eq(games.playerId, input.playerId),
+            eq(guesses.points, 5000),
+            gte(games.gameTimeStarted, start),
+            lte(games.gameTimeStarted, end),
+          ),
         )
         .innerJoin(rounds, eq(guesses.roundId, rounds.roundId))
         .innerJoin(games, eq(rounds.gameId, games.gameId));
       return query;
     }),
   zeroScoreGuesses: publicProcedure
-    .input(z.object({ playerId: z.string() }))
+    .input(z.object({ playerId: z.string(), selectedMonth: z.string() }))
     .query(async ({ input, ctx }) => {
+      const { start, end } = getMonthTimestampRange(input.selectedMonth);
       const query = await ctx.db
         .select({
           count: count(guesses.guessId),
         })
         .from(guesses)
-        .where(and(eq(games.playerId, input.playerId), eq(guesses.points, 0)))
+        .where(
+          and(
+            eq(games.playerId, input.playerId),
+            eq(guesses.points, 0),
+            gte(games.gameTimeStarted, start),
+            lte(games.gameTimeStarted, end),
+          ),
+        )
         .innerJoin(rounds, eq(guesses.roundId, rounds.roundId))
         .innerJoin(games, eq(rounds.gameId, games.gameId));
       return query;
     }),
   correctCountryGuesses: publicProcedure
-    .input(z.object({ playerId: z.string() }))
+    .input(z.object({ playerId: z.string(), selectedMonth: z.string() }))
     .query(async ({ input, ctx }) => {
+      const { start, end } = getMonthTimestampRange(input.selectedMonth);
       const query = await ctx.db
         .select({
           count: count(guesses.guessId),
@@ -119,6 +143,8 @@ export const guessRouter = createTRPCRouter({
           and(
             eq(games.playerId, input.playerId),
             eq(guesses.countryCode, answers.countryCode),
+            gte(games.gameTimeStarted, start),
+            lte(games.gameTimeStarted, end),
           ),
         )
         .innerJoin(rounds, eq(guesses.roundId, rounds.roundId))
@@ -127,23 +153,30 @@ export const guessRouter = createTRPCRouter({
       return query;
     }),
   timedOutGuesses: publicProcedure
-    .input(z.object({ playerId: z.string() }))
+    .input(z.object({ playerId: z.string(), selectedMonth: z.string() }))
     .query(async ({ input, ctx }) => {
+      const { start, end } = getMonthTimestampRange(input.selectedMonth);
       const query = await ctx.db
         .select({
           count: count(guesses.guessId),
         })
         .from(guesses)
         .where(
-          and(eq(games.playerId, input.playerId), eq(guesses.timedOut, true)),
+          and(
+            eq(games.playerId, input.playerId),
+            eq(guesses.timedOut, true),
+            gte(games.gameTimeStarted, start),
+            lte(games.gameTimeStarted, end),
+          ),
         )
         .innerJoin(rounds, eq(guesses.roundId, rounds.roundId))
         .innerJoin(games, eq(rounds.gameId, games.gameId));
       return query;
     }),
   guessesInObama: publicProcedure
-    .input(z.object({ playerId: z.string() }))
+    .input(z.object({ playerId: z.string(), selectedMonth: z.string() }))
     .query(async ({ input, ctx }) => {
+      const { start, end } = getMonthTimestampRange(input.selectedMonth);
       const query = await ctx.db
         .select({
           count: count(guesses.guessId),
@@ -156,6 +189,8 @@ export const guessRouter = createTRPCRouter({
             lte(guesses.lng, 135.8448),
             gte(guesses.lat, 35.45665),
             lte(guesses.lat, 35.535195),
+            gte(games.gameTimeStarted, start),
+            lte(games.gameTimeStarted, end),
           ),
         )
         .innerJoin(rounds, eq(guesses.roundId, rounds.roundId))
@@ -163,8 +198,9 @@ export const guessRouter = createTRPCRouter({
       return query;
     }),
   guessesNearMoodeng: publicProcedure
-    .input(z.object({ playerId: z.string() }))
+    .input(z.object({ playerId: z.string(), selectedMonth: z.string() }))
     .query(async ({ input, ctx }) => {
+      const { start, end } = getMonthTimestampRange(input.selectedMonth);
       const mooDengBoundingBox = calculateBoundingBox(
         moodengCenter.lat,
         moodengCenter.lng,
@@ -237,8 +273,9 @@ export const guessRouter = createTRPCRouter({
       };
     }),
   thailandRegionGuesses: publicProcedure
-    .input(z.object({ playerId: z.string() }))
+    .input(z.object({ playerId: z.string(), selectedMonth: z.string() }))
     .query(async ({ input, ctx }) => {
+      const { start, end } = getMonthTimestampRange(input.selectedMonth);
       const thailandGuesses = await ctx.db
         .select({
           guess: guesses,
@@ -250,6 +287,8 @@ export const guessRouter = createTRPCRouter({
           and(
             eq(games.playerId, input.playerId),
             eq(guesses.countryCode, "th"),
+            gte(games.gameTimeStarted, start),
+            lte(games.gameTimeStarted, end),
           ),
         )
         .innerJoin(rounds, eq(guesses.roundId, rounds.roundId))
@@ -278,28 +317,5 @@ export const guessRouter = createTRPCRouter({
         fiftyKm,
         hundredKm,
       };
-    }),
-  getAll: publicProcedure
-    .input(z.object({ geoGuessrId: z.string() }))
-    .query(async ({ input, ctx }) => {
-      const query = await ctx.db
-        .select({
-          points: guesses.points,
-          lat: guesses.lat,
-          lng: guesses.lng,
-          id: guesses.guessId,
-        })
-        .from(guesses)
-        .where(
-          and(
-            eq(guesses.geoguessrId, input.geoGuessrId),
-            not(eq(guesses.lat, 0)),
-            not(eq(guesses.lng, 0)),
-          ),
-        );
-      return query.map((row) => ({
-        location: { lng: row.lng, lat: row.lat },
-        key: row.id,
-      }));
     }),
 });

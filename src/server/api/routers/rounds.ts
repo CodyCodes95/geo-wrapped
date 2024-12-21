@@ -3,11 +3,13 @@ import { z } from "zod";
 
 import { createTRPCRouter, publicProcedure } from "~/server/api/trpc";
 import { answers, games, rounds } from "~/server/db/schema";
+import { getMonthTimestampRange } from "~/utils";
 
 export const roundRouter = createTRPCRouter({
   roundsInObama: publicProcedure
-    .input(z.object({ playerId: z.string() }))
+    .input(z.object({ playerId: z.string(), selectedMonth: z.string() }))
     .query(async ({ input, ctx }) => {
+      const { start, end } = getMonthTimestampRange(input.selectedMonth);
       const query = await ctx.db
         .select({
           count: count(rounds.roundId),
@@ -20,6 +22,8 @@ export const roundRouter = createTRPCRouter({
             lte(answers.lng, 135.8448),
             gte(answers.lat, 35.45665),
             lte(answers.lat, 35.535195),
+            gte(games.gameTimeStarted, start),
+            lte(games.gameTimeStarted, end),
           ),
         )
         .innerJoin(games, eq(rounds.gameId, games.gameId))
@@ -27,14 +31,21 @@ export const roundRouter = createTRPCRouter({
       return query[0]?.count ?? 0;
     }),
   totalRoundCount: publicProcedure
-    .input(z.object({ playerId: z.string() }))
+    .input(z.object({ playerId: z.string(), selectedMonth: z.string() }))
     .query(async ({ input, ctx }) => {
+      const { start, end } = getMonthTimestampRange(input.selectedMonth);
       const query = await ctx.db
         .select({
           count: count(rounds.roundId),
         })
         .from(rounds)
-        .where(eq(games.playerId, input.playerId))
+        .where(
+          and(
+            eq(games.playerId, input.playerId),
+            gte(games.gameTimeStarted, start),
+            lte(games.gameTimeStarted, end),
+          ),
+        )
         .innerJoin(games, eq(rounds.gameId, games.gameId));
       return query[0]?.count ?? 0;
     }),

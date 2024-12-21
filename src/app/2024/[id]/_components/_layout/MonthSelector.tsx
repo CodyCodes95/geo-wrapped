@@ -1,8 +1,21 @@
 "use client";
+import { createContext, useContext, useEffect, useState } from "react";
 import { motion } from "framer-motion";
-import { useState } from "react";
+import { Button } from "~/components/ui/button";
+import { create } from "zustand";
+
+type MonthStore = {
+  selectedMonth: string;
+  setSelectedMonth: (month: string) => void;
+};
+
+export const useMonth = create<MonthStore>((set) => ({
+  selectedMonth: "total",
+  setSelectedMonth: (month: string) => set({ selectedMonth: month }),
+}));
+
 export const MonthSelector = () => {
-  const [selectedMonth, setSelectedMonth] = useState("total");
+  const { selectedMonth, setSelectedMonth } = useMonth();
   const months = [
     "total",
     "January",
@@ -18,7 +31,9 @@ export const MonthSelector = () => {
     "November",
     "December",
   ];
-
+  useEffect(() => {
+    console.log(selectedMonth);
+  }, [selectedMonth]);
   return (
     <div className="flex gap-2 overflow-x-auto">
       {months.map((month) => (

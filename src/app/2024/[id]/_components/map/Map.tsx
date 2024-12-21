@@ -5,13 +5,13 @@ import { env } from "~/env";
 import { api } from "~/trpc/react";
 import { ClusteredMarkers } from "./ClusteredMarkers";
 import { usePlayerId } from "../dashboard/_hooks/usePlayerId";
-
-console.log(env.NEXT_PUBLIC_GOOGLE_API_KEY);
+import { useMonth } from "../_layout/MonthSelector";
 
 const Map = () => {
   const playerId = usePlayerId()!;
+  const { selectedMonth } = useMonth();
   const { data: rounds } = api.games.getAllWithResults.useQuery(
-    { playerId: playerId },
+    { playerId: playerId, selectedMonth },
     { enabled: !!playerId },
   );
 

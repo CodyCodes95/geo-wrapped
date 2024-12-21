@@ -1,30 +1,54 @@
-import { and, count, countDistinct, desc, eq, not } from "drizzle-orm";
+import {
+  and,
+  count,
+  countDistinct,
+  desc,
+  eq,
+  gte,
+  lte,
+  not,
+} from "drizzle-orm";
 import { z } from "zod";
 
 import { createTRPCRouter, publicProcedure } from "~/server/api/trpc";
 import { answers, games, guesses, rounds } from "~/server/db/schema";
+import { getMonthTimestampRange } from "~/utils";
 
 export const gameRouter = createTRPCRouter({
   getTotalGamesCount: publicProcedure
-    .input(z.object({ id: z.string() }))
+    .input(z.object({ id: z.string(), selectedMonth: z.string() }))
     .query(async ({ input, ctx }) => {
+      const { start, end } = getMonthTimestampRange(input.selectedMonth);
       const gamesCount = await ctx.db
         .select({ count: count() })
         .from(games)
-        .where(eq(games.playerId, input.id));
+        .where(
+          and(
+            eq(games.playerId, input.id),
+            gte(games.gameTimeStarted, start),
+            lte(games.gameTimeStarted, end),
+          ),
+        );
 
       return gamesCount[0]?.count;
     }),
   gameTypes: publicProcedure
-    .input(z.object({ id: z.string() }))
+    .input(z.object({ id: z.string(), selectedMonth: z.string() }))
     .query(async ({ input, ctx }) => {
+      const { start, end } = getMonthTimestampRange(input.selectedMonth);
       const query = await ctx.db
         .select({
           count: count(games.gameId),
           type: games.type,
         })
         .from(games)
-        .where(eq(games.playerId, input.id))
+        .where(
+          and(
+            eq(games.playerId, input.id),
+            gte(games.gameTimeStarted, start),
+            lte(games.gameTimeStarted, end),
+          ),
+        )
         .groupBy(games.type)
         .orderBy(desc(count(games.type)));
 
@@ -34,15 +58,22 @@ export const gameRouter = createTRPCRouter({
       };
     }),
   gameModes: publicProcedure
-    .input(z.object({ id: z.string() }))
+    .input(z.object({ id: z.string(), selectedMonth: z.string() }))
     .query(async ({ input, ctx }) => {
+      const { start, end } = getMonthTimestampRange(input.selectedMonth);
       const query = await ctx.db
         .select({
           count: count(games.gameId),
           mode: games.mode,
         })
         .from(games)
-        .where(eq(games.playerId, input.id))
+        .where(
+          and(
+            eq(games.playerId, input.id),
+            gte(games.gameTimeStarted, start),
+            lte(games.gameTimeStarted, end),
+          ),
+        )
         .groupBy(games.mode)
         .orderBy(desc(count(games.mode)));
 
@@ -50,32 +81,31 @@ export const gameRouter = createTRPCRouter({
         standard: query.find((t) => t.mode === "Standard")?.count ?? 0,
         noMove: query.find((t) => t.mode === "NoMove")?.count ?? 0,
         nmpz: query.find((t) => t.mode === "NMPZ")?.count ?? 0,
-      }
+      };
     }),
   getFavouriteMaps: publicProcedure
-    .input(z.object({ id: z.string() }))
+    .input(z.object({ id: z.string(), selectedMonth: z.string() }))
     .query(async ({ input, ctx }) => {
+      const { start, end } = getMonthTimestampRange(input.selectedMonth);
       const gamesCount = await ctx.db
         .select({ count: count(games.gameId), mapName: games.mapName })
         .from(games)
-        .where(eq(games.playerId, input.id))
+        .where(
+          and(
+            eq(games.playerId, input.id),
+            gte(games.gameTimeStarted, start),
+            lte(games.gameTimeStarted, end),
+          ),
+        )
         .groupBy(games.mapName)
         .orderBy(desc(count(games.mapName)));
 
       return gamesCount;
     }),
-  getAll: publicProcedure
-    .input(z.object({ playerId: z.string() }))
-    .query(async ({ input, ctx }) => {
-      const query = await ctx.db.query.games.findMany({
-        where: eq(games.playerId, input.playerId),
-      });
-      return query;
-    }),
-
   getAllWithResults: publicProcedure
-    .input(z.object({ playerId: z.string() }))
+    .input(z.object({ playerId: z.string(), selectedMonth: z.string() }))
     .query(async ({ input, ctx }) => {
+      const { start, end } = getMonthTimestampRange(input.selectedMonth);
       const query = await ctx.db
         .select({
           gameId: games.gameId,
@@ -92,6 +122,8 @@ export const gameRouter = createTRPCRouter({
         .where(
           and(
             eq(games.playerId, input.playerId),
+            gte(games.gameTimeStarted, start),
+            lte(games.gameTimeStarted, end),
             not(eq(guesses.lat, 0)),
             not(eq(guesses.lng, 0)),
           ),

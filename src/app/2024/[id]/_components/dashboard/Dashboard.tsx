@@ -10,10 +10,6 @@ import { useRainboltMode } from "./_hooks/useRainboltMode";
 
 const Dashboard = () => {
   const playerId = usePlayerId()!;
-  const { data: games } = api.games.getAll.useQuery(
-    { playerId },
-    { enabled: !!playerId },
-  );
   const { RainboltMode } = useRainboltMode();
   return (
     <>

@@ -68,6 +68,9 @@ export const games = sqliteTable(
       table.playerId,
       table.gameTimeStarted,
     ),
+    gameTimeStartedIdx: index("games_game_time_started_idx").on(
+      table.gameTimeStarted,
+    ),
   }),
 );
 

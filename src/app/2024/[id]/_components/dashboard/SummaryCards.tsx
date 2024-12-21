@@ -6,6 +6,7 @@ import { StatCard } from "./StatCard";
 import { getCountryFlagEmoji } from "~/utils";
 import { useRainboltMode } from "./_hooks/useRainboltMode";
 import { cn } from "~/lib/utils";
+import { useMonth } from "../_layout/MonthSelector";
 
 export const SummaryCards = () => {
   const { isRainboltMode } = useRainboltMode();
@@ -32,8 +33,10 @@ export const SummaryCards = () => {
 
 const ThailandRegionCard = () => {
   const playerId = usePlayerId()!;
+  const { selectedMonth } = useMonth();
   const { data: guesses } = api.guesses.thailandRegionGuesses.useQuery({
     playerId,
+    selectedMonth,
   });
   return (
     <StatCard
@@ -47,15 +50,21 @@ const ThailandRegionCard = () => {
           <ul className="flex flex-col gap-2">
             <li className="flex w-full items-center justify-between">
               <span>{"5k's"} in Thailand:</span>
-              <span className="text-primary">{guesses?.fiveK?.length ?? 0}</span>
+              <span className="text-primary">
+                {guesses?.fiveK?.length ?? 0}
+              </span>
             </li>
             <li className="flex w-full items-center justify-between">
               <span>Thailand guesses within 50km:</span>
-              <span className="text-primary">{guesses?.fiftyKm?.length ?? 0}</span>
+              <span className="text-primary">
+                {guesses?.fiftyKm?.length ?? 0}
+              </span>
             </li>
             <li className="flex w-full items-center justify-between">
               <span>Thailand guesses within 100km:</span>
-              <span className="text-primary">{guesses?.hundredKm?.length ?? 0}</span>
+              <span className="text-primary">
+                {guesses?.hundredKm?.length ?? 0}
+              </span>
             </li>
           </ul>
         </div>
@@ -66,11 +75,14 @@ const ThailandRegionCard = () => {
 
 export const TimedOutCard = () => {
   const playerId = usePlayerId()!;
+  const { selectedMonth } = useMonth();
   const { data: guesses } = api.guesses.timedOutGuesses.useQuery({
     playerId,
+    selectedMonth,
   });
   const { data: totalRoundCount } = api.rounds.totalRoundCount.useQuery({
     playerId,
+    selectedMonth,
   });
   return (
     <StatCard
@@ -102,8 +114,10 @@ export const TimedOutCard = () => {
 
 export const MooDengCard = () => {
   const playerId = usePlayerId()!;
+  const { selectedMonth } = useMonth();
   const { data: guesses } = api.guesses.guessesNearMoodeng.useQuery({
     playerId,
+    selectedMonth,
   });
   return (
     <StatCard
@@ -153,8 +167,10 @@ const MooDengDetail = ({
 
 export const GuessesInObamaCard = () => {
   const playerId = usePlayerId()!;
+  const { selectedMonth } = useMonth();
   const { data: guesses } = api.guesses.guessesInObama.useQuery({
     playerId,
+    selectedMonth,
   });
   return (
     <StatCard
@@ -182,8 +198,10 @@ export const SkeletonCell = ({ className }: { className: string }) => {
 
 export const ObamaDetail = ({ guessesInObama }: { guessesInObama: number }) => {
   const playerId = usePlayerId()!;
+  const { selectedMonth } = useMonth();
   const { data: roundsInObama, isLoading } = api.rounds.roundsInObama.useQuery({
     playerId,
+    selectedMonth,
   });
 
   if (isLoading)
@@ -230,9 +248,19 @@ export const ObamaDetail = ({ guessesInObama }: { guessesInObama: number }) => {
 
 export const TotalGamesCard = () => {
   const id = usePlayerId()!;
-  const { data: gamesTypes } = api.games.gameTypes.useQuery({ id });
-  const { data: gamesModes } = api.games.gameModes.useQuery({ id });
-  const { data: count } = api.games.getTotalGamesCount.useQuery({ id });
+  const { selectedMonth } = useMonth();
+  const { data: gamesTypes } = api.games.gameTypes.useQuery({
+    id,
+    selectedMonth,
+  });
+  const { data: gamesModes } = api.games.gameModes.useQuery({
+    id,
+    selectedMonth,
+  });
+  const { data: count } = api.games.getTotalGamesCount.useQuery({
+    id,
+    selectedMonth,
+  });
   return (
     <StatCard
       icon={TrophyIcon}
@@ -272,25 +300,31 @@ export const TotalGamesCard = () => {
 
 export const AverageScoreCard = () => {
   const playerId = usePlayerId()!;
+  const { selectedMonth } = useMonth();
   const { data: avgScore } = api.guesses.getAverageScore.useQuery({
     playerId,
+    selectedMonth,
   });
 
   const { data: fiveKGuesses } = api.guesses.fiveKGuesses.useQuery({
     playerId,
+    selectedMonth,
   });
 
   const { data: zeroScoreGuesses } = api.guesses.zeroScoreGuesses.useQuery({
     playerId,
+    selectedMonth,
   });
 
   const { data: correctCountryGuesses } =
     api.guesses.correctCountryGuesses.useQuery({
       playerId,
+      selectedMonth,
     });
 
   const { data: totalRoundCount } = api.rounds.totalRoundCount.useQuery({
     playerId,
+    selectedMonth,
   });
 
   return (
@@ -334,8 +368,12 @@ export const AverageScoreCard = () => {
 
 export const FavouriteMapCard = () => {
   const id = usePlayerId()!;
+  const { selectedMonth } = useMonth();
 
-  const { data: maps } = api.games.getFavouriteMaps.useQuery({ id });
+  const { data: maps } = api.games.getFavouriteMaps.useQuery({
+    id,
+    selectedMonth,
+  });
 
   return (
     <StatCard
@@ -348,7 +386,10 @@ export const FavouriteMapCard = () => {
           <h3 className="mb-2 text-lg font-semibold">Top maps</h3>
           <ul className="flex flex-col gap-2">
             {maps?.map((map) => (
-              <li key={map.mapName} className="flex w-full items-center justify-between">
+              <li
+                key={map.mapName}
+                className="flex w-full items-center justify-between"
+              >
                 <span>{map.mapName}:</span>
                 <span className="text-primary">{map.count}</span>
               </li>
@@ -362,8 +403,10 @@ export const FavouriteMapCard = () => {
 
 export const TopCountryCard = () => {
   const playerId = usePlayerId()!;
+  const { selectedMonth } = useMonth();
   const { data: topCountries } = api.asnwers.getTopCountries.useQuery({
     playerId,
+    selectedMonth,
   });
   return (
     <StatCard
@@ -376,7 +419,10 @@ export const TopCountryCard = () => {
           <h3 className="mb-2 text-lg font-semibold">Top countries</h3>
           <ul className="flex flex-col gap-2">
             {topCountries?.map((country) => (
-              <li key={country.country} className="flex w-full items-center justify-between">
+              <li
+                key={country.country}
+                className="flex w-full items-center justify-between"
+              >
                 <span>{getCountryFlagEmoji(country.country)}:</span>
                 <span className="text-primary">{country.count}</span>
               </li>
