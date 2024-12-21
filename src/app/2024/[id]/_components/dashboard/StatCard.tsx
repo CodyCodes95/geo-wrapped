@@ -3,13 +3,15 @@ import { Button } from "~/components/ui/button";
 import { Card } from "~/components/ui/card";
 import { useFlip } from "./_hooks/useFlip";
 import { getCountryFlagEmoji } from "~/utils";
+import { SkeletonCell } from "./SummaryCards";
 
 type StatCardProps = {
   icon: LucideIcon | string;
   iconColor?: string;
   title: string;
-  value: string | number;
-  detailedContent: React.ReactNode;
+  value: string | number | React.ReactNode;
+  detailedContent?: React.ReactNode;
+  loading?: boolean;
 };
 
 export const StatCard: React.FC<StatCardProps> = ({
@@ -18,8 +20,34 @@ export const StatCard: React.FC<StatCardProps> = ({
   title,
   value,
   detailedContent,
+  loading,
 }) => {
   const { isFlipped, flip } = useFlip();
+
+  if (loading) {
+    return (
+      <div className="rounded-lg border p-4">
+        <div className="flex items-center gap-2">
+          {typeof Icon === "string" ? (
+            <span className="text-2xl">{Icon}</span>
+          ) : (
+            <Icon className={`h-8 w-8 ${iconColor}`} />
+          )}
+          <h3 className="text-lg font-semibold">{title}</h3>
+        </div>
+        <div className="mt-2">
+          <SkeletonCell className="h-8 w-24" />
+        </div>
+        {detailedContent && (
+          <div className="mt-4 space-y-2">
+            <SkeletonCell className="w-full" />
+            <SkeletonCell className="w-full" />
+            <SkeletonCell className="w-full" />
+          </div>
+        )}
+      </div>
+    );
+  }
 
   return (
     <Card className="relative h-[200px] w-full [perspective:1000px]">

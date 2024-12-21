@@ -34,16 +34,18 @@ export const SummaryCards = () => {
 const ThailandRegionCard = () => {
   const playerId = usePlayerId()!;
   const { selectedMonth } = useMonth();
-  const { data: guesses } = api.guesses.thailandRegionGuesses.useQuery({
+  const { data: guesses, isLoading } = api.guesses.thailandRegionGuesses.useQuery({
     playerId,
     selectedMonth,
   });
+
   return (
     <StatCard
       icon={getCountryFlagEmoji("TH")}
       iconColor="text-green-500"
-      title={`Thailand Region Guesses (withim 100km)`}
+      title="Thailand Region Guesses (withim 100km)"
       value={guesses?.hundredKm?.length ?? 0}
+      loading={isLoading}
       detailedContent={
         <div>
           <h3 className="mb-2 text-lg font-semibold">MooDeng Breakdown</h3>
@@ -76,20 +78,22 @@ const ThailandRegionCard = () => {
 export const TimedOutCard = () => {
   const playerId = usePlayerId()!;
   const { selectedMonth } = useMonth();
-  const { data: guesses } = api.guesses.timedOutGuesses.useQuery({
+  const { data: guesses, isLoading: guessesLoading } = api.guesses.timedOutGuesses.useQuery({
     playerId,
     selectedMonth,
   });
-  const { data: totalRoundCount } = api.rounds.totalRoundCount.useQuery({
+  const { data: totalRoundCount, isLoading: roundsLoading } = api.rounds.totalRoundCount.useQuery({
     playerId,
     selectedMonth,
   });
+
   return (
     <StatCard
       icon={"😂🫵"}
       iconColor="text-green-500"
-      title={`Timed Out Guesses 💀`}
+      title="Timed Out Guesses 💀"
       value={guesses?.[0]?.count ?? 0}
+      loading={guessesLoading || roundsLoading}
       detailedContent={
         <div className="flex flex-col gap-2">
           <p>
@@ -115,15 +119,17 @@ export const TimedOutCard = () => {
 export const MooDengCard = () => {
   const playerId = usePlayerId()!;
   const { selectedMonth } = useMonth();
-  const { data: guesses } = api.guesses.guessesNearMoodeng.useQuery({
+  const { data: guesses, isLoading } = api.guesses.guessesNearMoodeng.useQuery({
     playerId,
     selectedMonth,
   });
+
   return (
     <StatCard
       icon={getCountryFlagEmoji("TH")}
-      title={"Moo Deng Guesses"}
+      title="Moo Deng Guesses"
       value={guesses?.mooDengGuesses ?? 0}
+      loading={isLoading}
       detailedContent={
         <MooDengDetail
           guesses={guesses?.mooDengGuesses ?? 0}
@@ -168,16 +174,18 @@ const MooDengDetail = ({
 export const GuessesInObamaCard = () => {
   const playerId = usePlayerId()!;
   const { selectedMonth } = useMonth();
-  const { data: guesses } = api.guesses.guessesInObama.useQuery({
+  const { data: guesses, isLoading } = api.guesses.guessesInObama.useQuery({
     playerId,
     selectedMonth,
   });
+
   return (
     <StatCard
       icon={getCountryFlagEmoji("JP")}
       iconColor="text-green-500"
-      title={`Guesses in Obama`}
+      title="Guesses in Obama"
       value={guesses?.[0]?.count ?? 0}
+      loading={isLoading}
       detailedContent={
         <ObamaDetail guessesInObama={guesses?.[0]?.count ?? 0} />
       }
@@ -249,24 +257,26 @@ export const ObamaDetail = ({ guessesInObama }: { guessesInObama: number }) => {
 export const TotalGamesCard = () => {
   const id = usePlayerId()!;
   const { selectedMonth } = useMonth();
-  const { data: gamesTypes } = api.games.gameTypes.useQuery({
+  const { data: gamesTypes, isLoading: typesLoading } = api.games.gameTypes.useQuery({
     id,
     selectedMonth,
   });
-  const { data: gamesModes } = api.games.gameModes.useQuery({
+  const { data: gamesModes, isLoading: modesLoading } = api.games.gameModes.useQuery({
     id,
     selectedMonth,
   });
-  const { data: count } = api.games.getTotalGamesCount.useQuery({
+  const { data: count, isLoading: countLoading } = api.games.getTotalGamesCount.useQuery({
     id,
     selectedMonth,
   });
+
   return (
     <StatCard
       icon={TrophyIcon}
       iconColor="text-yellow-500"
       title="Total Games"
       value={count ?? 0}
+      loading={typesLoading || modesLoading || countLoading}
       detailedContent={
         <div>
           <h3 className="mb-2 text-lg font-semibold">Game Breakdown</h3>
@@ -301,7 +311,7 @@ export const TotalGamesCard = () => {
 export const AverageScoreCard = () => {
   const playerId = usePlayerId()!;
   const { selectedMonth } = useMonth();
-  const { data: avgScore } = api.guesses.getAverageScore.useQuery({
+  const { data: avgScore, isLoading: avgLoading } = api.guesses.getAverageScore.useQuery({
     playerId,
     selectedMonth,
   });
@@ -333,6 +343,7 @@ export const AverageScoreCard = () => {
       iconColor="text-green-500"
       title="Avg. Score"
       value={avgScore ?? 0}
+      loading={avgLoading}
       detailedContent={
         <div>
           <h3 className="mb-2 text-lg font-semibold">Score Breakdown</h3>
@@ -369,8 +380,7 @@ export const AverageScoreCard = () => {
 export const FavouriteMapCard = () => {
   const id = usePlayerId()!;
   const { selectedMonth } = useMonth();
-
-  const { data: maps } = api.games.getFavouriteMaps.useQuery({
+  const { data: maps, isLoading } = api.games.getFavouriteMaps.useQuery({
     id,
     selectedMonth,
   });
@@ -381,6 +391,7 @@ export const FavouriteMapCard = () => {
       iconColor="text-purple-500"
       title="Favorite Map"
       value={maps?.[0]?.mapName ?? ""}
+      loading={isLoading}
       detailedContent={
         <div>
           <h3 className="mb-2 text-lg font-semibold">Top maps</h3>
@@ -404,16 +415,18 @@ export const FavouriteMapCard = () => {
 export const TopCountryCard = () => {
   const playerId = usePlayerId()!;
   const { selectedMonth } = useMonth();
-  const { data: topCountries } = api.asnwers.getTopCountries.useQuery({
+  const { data: topCountries, isLoading } = api.asnwers.getTopCountries.useQuery({
     playerId,
     selectedMonth,
   });
+
   return (
     <StatCard
       icon={Globe2Icon}
       iconColor="text-blue-500"
       title="Top country"
       value={getCountryFlagEmoji(topCountries?.[0]?.country)}
+      loading={isLoading}
       detailedContent={
         <div>
           <h3 className="mb-2 text-lg font-semibold">Top countries</h3>
