@@ -1,16 +1,7 @@
-import React, { Suspense } from "react";
+import React from "react";
 import { api } from "~/trpc/server";
 import { notFound } from "next/navigation";
-import { Card, CardContent, CardHeader, CardTitle } from "~/components/ui/card";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "~/components/ui/tabs";
 import { Avatar, AvatarFallback, AvatarImage } from "~/components/ui/avatar";
-import { Globe2 } from "lucide-react";
-import {
-  AverageScoreCard,
-  FavouriteMapCard,
-  TotalGamesCard,
-} from "./_components/dashboard/SummaryCards";
-import Map from "./_components/map/Map";
 import Dashboard from "./_components/dashboard/Dashboard";
 import { getCountryFlagEmoji } from "~/utils";
 
@@ -27,7 +18,7 @@ export default async function Page({
   }
 
   if (!player.processed) {
-    <p>Processing</p>;
+    <p>Processing. Please come back later</p>;
   }
 
   return (

@@ -2,7 +2,7 @@
 import { Globe2Icon, MapIcon, TargetIcon, TrophyIcon } from "lucide-react";
 import { usePlayerId } from "./_hooks/usePlayerId";
 import { api } from "~/trpc/react";
-import { StatCard } from "./StatCard";
+import { SkeletonCell, StatCard } from "./StatCard";
 import { getCountryFlagEmoji } from "~/utils";
 import { useRainboltMode } from "./_hooks/useRainboltMode";
 import { cn } from "~/lib/utils";
@@ -189,17 +189,6 @@ export const GuessesInObamaCard = () => {
       detailedContent={
         <ObamaDetail guessesInObama={guesses?.[0]?.count ?? 0} />
       }
-    />
-  );
-};
-
-export const SkeletonCell = ({ className }: { className: string }) => {
-  return (
-    <div
-      className={cn(
-        "h-6 w-full animate-pulse rounded-md bg-muted-foreground",
-        className,
-      )}
     />
   );
 };

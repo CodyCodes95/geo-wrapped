@@ -18,23 +18,12 @@ const Map = () => {
   return (
     <APIProvider apiKey={env.NEXT_PUBLIC_GOOGLE_API_KEY}>
       <GoogleMap
-        onBoundsChanged={(b) => console.log(b.detail)}
-        defaultBounds={{
-          north: 35.5774,
-          south: 35.3844,
-          east: 135.8603,
-          west: 135.5887,
-          // north: 135.5887,
-          // south: 135.8603,
-          // east: 35.3844,
-          // west: 35.5774,
-        }}
         mapId={env.NEXT_PUBLIC_GOOGLE_MAP_ID}
-        style={{ width: "100%", height: "100vh" }}
-        // defaultCenter={{ lat: 22.54992, lng: 0 }}
-        defaultZoom={3}
+        style={{ width: "100%", height: "60vh" }}
+        defaultCenter={{ lat: 22.54992, lng: 0 }}
+        defaultZoom={2}
         gestureHandling={"greedy"}
-        disableDefaultUI={true}
+        // disableDefaultUI={true}
       >
         {rounds && <ClusteredMarkers rounds={rounds} />}
       </GoogleMap>

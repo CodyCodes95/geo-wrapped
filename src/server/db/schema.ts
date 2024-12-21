@@ -53,6 +53,7 @@ export const games = sqliteTable(
       mode: "timestamp",
     }).notNull(),
     totalTime: integer("total_time").notNull(),
+    totalPoints: integer("total_points"), // New nullable column
     mapName: text("map_name").notNull(),
     mapId: text("map_id").notNull(),
     createdAt: integer("created_at", { mode: "timestamp" })

@@ -1,8 +1,4 @@
-"use client";
-
-import dynamic from "next/dynamic";
-
-const Wrapped = dynamic(() => import("./components/Wrapped"), { ssr: false });
+import Wrapped from "./components/Wrapped";
 
 export default function Page() {
   return <Wrapped />;

@@ -1,5 +1,5 @@
 import { motion } from "framer-motion";
-import { YearStats } from "../Wrapped";
+import { type YearStats } from "../Wrapped";
 
 interface Props {
   stats: YearStats;

@@ -1,4 +1,4 @@
-import { and, avg, count, eq, gte, lte, not } from "drizzle-orm";
+import { and, avg, count, desc, eq, gte, lte, ne, not, sql } from "drizzle-orm";
 import { z } from "zod";
 
 import { createTRPCRouter, publicProcedure } from "~/server/api/trpc";
@@ -317,5 +317,54 @@ export const guessRouter = createTRPCRouter({
         fiftyKm,
         hundredKm,
       };
+    }),
+
+  strongestCountries: publicProcedure
+    .input(z.object({ playerId: z.string() }))
+    .query(async ({ input, ctx }) => {
+      const { playerId } = input;
+      const query = await ctx.db
+        .select({
+          country: answers.countryCode,
+          correctGuesses: sql`count(case when ${answers.countryCode} = ${guesses.countryCode} then 1 end)`,
+          totalGuesses: count(answers.answerId),
+        })
+        .from(answers)
+        .innerJoin(rounds, eq(rounds.answerId, answers.answerId))
+        .innerJoin(guesses, eq(rounds.roundId, guesses.roundId))
+        .innerJoin(games, eq(rounds.gameId, games.gameId))
+        .where(eq(games.playerId, playerId))
+        .groupBy(answers.countryCode)
+        .orderBy(
+          desc(
+            sql`count(case when ${answers.countryCode} = ${guesses.countryCode} then 1 end)`,
+          ),
+        )
+        .limit(4);
+      return query;
+    }),
+
+  weakestCountries: publicProcedure
+    .input(z.object({ playerId: z.string() }))
+    .query(async ({ input, ctx }) => {
+      const { playerId } = input;
+      return ctx.db
+        .select({
+          country: answers.countryCode,
+          total: count(),
+        })
+        .from(answers)
+        .innerJoin(rounds, eq(rounds.answerId, answers.answerId))
+        .innerJoin(guesses, eq(rounds.roundId, guesses.roundId))
+        .innerJoin(games, eq(rounds.gameId, games.gameId))
+        .where(
+          and(
+            eq(games.playerId, playerId),
+            ne(answers.countryCode, guesses.countryCode),
+          ),
+        )
+        .groupBy(answers.countryCode)
+        .orderBy(desc(count()))
+        .limit(4);
     }),
 });

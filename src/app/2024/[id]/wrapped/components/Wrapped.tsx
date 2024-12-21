@@ -1,11 +1,12 @@
+"use client";
 import React, { useEffect, useState } from "react";
 import { AnimatePresence, motion } from "framer-motion";
 import { WelcomeSlide } from "./slides/WelcomeSlide";
 import { TopGenreSlide } from "./slides/TopMapSlide";
 import { ListeningClockSlide } from "./slides/ListeningClockSlide";
-import { MoodSlide } from "./slides/MoodSlide";
 import { TopSongSlide } from "./slides/TopSongSlide";
 import { SummarySlide } from "./slides/SummarySlide";
+import { StrongestCountries, WeakestCountries } from "./Slides";
 
 export type YearStats = {
   topGenre: {
@@ -13,15 +14,31 @@ export type YearStats = {
     hours: number;
     topArtists: string[];
   };
+  topMap: {
+    name: string;
+    gamesPlayed: number;
+    minutesPlayed: number;
+    averageScore: number;
+    bestGames: {
+      gameMode: string;
+      points: number;
+      summaryUrl: string;
+    };
+  };
   listeningClock: {
     peakHour: string;
     timeRange: string;
     type: string;
   };
-  moods: {
-    name: string;
-    percentage: number;
-    emoji: string;
+  strongestCountries: {
+    country: string;
+    correctGuesses: number;
+    totalGuesses: number;
+  }[];
+  weakestCountries: {
+    country: string;
+    correctGuesses: number;
+    totalGuesses: number;
   }[];
   topSong: {
     name: string;
@@ -32,7 +49,7 @@ export type YearStats = {
   };
 };
 
-export const yearStats = {
+export const yearStats: YearStats = {
   topGenre: {
     name: "Electronic",
     hours: 1284,
@@ -43,12 +60,29 @@ export const yearStats = {
     timeRange: "11 PM - 2 AM",
     type: "Night Owl 🦉",
   },
-  moods: [
-    { name: "Energetic", percentage: 42, emoji: "🎵" },
-    { name: "Chill", percentage: 35, emoji: "✨" },
-    { name: "Melancholic", percentage: 13, emoji: "💫" },
-    { name: "Intense", percentage: 10, emoji: "⚡" },
+  strongestCountries: [
+    {
+      country: "au",
+      correctGuesses: 10,
+      totalGuesses: 100,
+    },
+    {
+      country: "au",
+      correctGuesses: 10,
+      totalGuesses: 100,
+    },
+    {
+      country: "au",
+      correctGuesses: 1,
+      totalGuesses: 100,
+    },
+    {
+      country: "us",
+      correctGuesses: 2,
+      totalGuesses: 100,
+    },
   ],
+  weakestCountries: [],
   topSong: {
     name: "Around the World",
     artist: "Daft Punk",
@@ -62,7 +96,8 @@ const slides = [
   WelcomeSlide,
   TopGenreSlide,
   ListeningClockSlide,
-  MoodSlide,
+  StrongestCountries,
+  WeakestCountries,
   TopSongSlide,
   SummarySlide,
 ];
