@@ -2,7 +2,7 @@ import { and, avg, count, eq, gte, lte, not } from "drizzle-orm";
 import { z } from "zod";
 
 import { createTRPCRouter, publicProcedure } from "~/server/api/trpc";
-import { games, guesses, rounds } from "~/server/db/schema";
+import { answers, games, guesses, rounds } from "~/server/db/schema";
 
 const moodengCenter = {
   lat: 13.216247039443203,
@@ -15,6 +15,37 @@ const obamaBoundingBox = {
   east: 135.8603,
   west: 135.5887,
 };
+
+// Radius of the Earth in kilometers
+const EARTH_RADIUS = 6371;
+
+type Point = {
+  lat: number;
+  lng: number;
+};
+
+function getDistanceInKm(point1: Point, point2: Point) {
+  const lat1 = toRadians(point1.lat);
+  const lat2 = toRadians(point2.lat);
+  const deltaLat = toRadians(point2.lat - point1.lat);
+  const deltaLng = toRadians(point2.lng - point1.lng);
+
+  // Haversine formula
+  const a =
+    Math.sin(deltaLat / 2) * Math.sin(deltaLat / 2) +
+    Math.cos(lat1) *
+      Math.cos(lat2) *
+      Math.sin(deltaLng / 2) *
+      Math.sin(deltaLng / 2);
+
+  const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
+
+  return EARTH_RADIUS * c;
+}
+
+function toRadians(degrees: number) {
+  return degrees * (Math.PI / 180);
+}
 
 function calculateBoundingBox(lat: number, lng: number, radiusKm: number) {
   const EARTH_RADIUS = 6371; // Earth's radius in kilometers
@@ -47,6 +78,68 @@ export const guessRouter = createTRPCRouter({
         .where(eq(games.playerId, input.playerId));
 
       return Math.round(Number(query[0]?.scoreAverage) ?? 0);
+    }),
+  fiveKGuesses: publicProcedure
+    .input(z.object({ playerId: z.string() }))
+    .query(async ({ input, ctx }) => {
+      const query = await ctx.db
+        .select({
+          count: count(guesses.guessId),
+        })
+        .from(guesses)
+        .where(
+          and(eq(games.playerId, input.playerId), eq(guesses.points, 5000)),
+        )
+        .innerJoin(rounds, eq(guesses.roundId, rounds.roundId))
+        .innerJoin(games, eq(rounds.gameId, games.gameId));
+      return query;
+    }),
+  zeroScoreGuesses: publicProcedure
+    .input(z.object({ playerId: z.string() }))
+    .query(async ({ input, ctx }) => {
+      const query = await ctx.db
+        .select({
+          count: count(guesses.guessId),
+        })
+        .from(guesses)
+        .where(and(eq(games.playerId, input.playerId), eq(guesses.points, 0)))
+        .innerJoin(rounds, eq(guesses.roundId, rounds.roundId))
+        .innerJoin(games, eq(rounds.gameId, games.gameId));
+      return query;
+    }),
+  correctCountryGuesses: publicProcedure
+    .input(z.object({ playerId: z.string() }))
+    .query(async ({ input, ctx }) => {
+      const query = await ctx.db
+        .select({
+          count: count(guesses.guessId),
+        })
+        .from(guesses)
+        .where(
+          and(
+            eq(games.playerId, input.playerId),
+            eq(guesses.countryCode, answers.countryCode),
+          ),
+        )
+        .innerJoin(rounds, eq(guesses.roundId, rounds.roundId))
+        .innerJoin(games, eq(rounds.gameId, games.gameId))
+        .innerJoin(answers, eq(rounds.answerId, answers.answerId));
+      return query;
+    }),
+  timedOutGuesses: publicProcedure
+    .input(z.object({ playerId: z.string() }))
+    .query(async ({ input, ctx }) => {
+      const query = await ctx.db
+        .select({
+          count: count(guesses.guessId),
+        })
+        .from(guesses)
+        .where(
+          and(eq(games.playerId, input.playerId), eq(guesses.timedOut, true)),
+        )
+        .innerJoin(rounds, eq(guesses.roundId, rounds.roundId))
+        .innerJoin(games, eq(rounds.gameId, games.gameId));
+      return query;
     }),
   guessesInObama: publicProcedure
     .input(z.object({ playerId: z.string() }))
@@ -143,7 +236,49 @@ export const guessRouter = createTRPCRouter({
         mooDeng50kmGuesses: mooDeng50kmGuesses.length,
       };
     }),
+  thailandRegionGuesses: publicProcedure
+    .input(z.object({ playerId: z.string() }))
+    .query(async ({ input, ctx }) => {
+      const thailandGuesses = await ctx.db
+        .select({
+          guess: guesses,
+          answer: answers,
+          points: guesses.points,
+        })
+        .from(guesses)
+        .where(
+          and(
+            eq(games.playerId, input.playerId),
+            eq(guesses.countryCode, "th"),
+          ),
+        )
+        .innerJoin(rounds, eq(guesses.roundId, rounds.roundId))
+        .innerJoin(games, eq(rounds.gameId, games.gameId))
+        .innerJoin(answers, eq(rounds.answerId, answers.answerId));
 
+      const guessesWithDistance = thailandGuesses.map((row) => {
+        const distance = getDistanceInKm(
+          { lat: row.answer.lat, lng: row.answer.lng },
+          { lat: row.guess.lat, lng: row.guess.lng },
+        );
+        return {
+          ...row,
+          distance,
+        };
+      });
+
+      const fiveK = guessesWithDistance.filter((row) => row.points === 5000);
+      const fiftyKm = guessesWithDistance.filter((row) => row.distance <= 50);
+      const hundredKm = guessesWithDistance.filter(
+        (row) => row.distance <= 100,
+      );
+
+      return {
+        fiveK,
+        fiftyKm,
+        hundredKm,
+      };
+    }),
   getAll: publicProcedure
     .input(z.object({ geoGuessrId: z.string() }))
     .query(async ({ input, ctx }) => {

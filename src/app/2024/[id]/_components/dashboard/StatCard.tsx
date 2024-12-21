@@ -2,14 +2,15 @@ import { InfoIcon, type LucideIcon } from "lucide-react";
 import { Button } from "~/components/ui/button";
 import { Card } from "~/components/ui/card";
 import { useFlip } from "./_hooks/useFlip";
+import { getCountryFlagEmoji } from "~/utils";
 
-interface StatCardProps {
-  icon: LucideIcon;
-  iconColor: string;
+type StatCardProps = {
+  icon: LucideIcon | string;
+  iconColor?: string;
   title: string;
   value: string | number;
   detailedContent: React.ReactNode;
-}
+};
 
 export const StatCard: React.FC<StatCardProps> = ({
   icon: Icon,
@@ -30,7 +31,11 @@ export const StatCard: React.FC<StatCardProps> = ({
         {/* Front of the card */}
         <div className="absolute flex h-full w-full flex-col justify-between p-6 [backface-visibility:hidden]">
           <div className="flex w-full items-center justify-between">
-            <Icon className={`h-8 w-8 ${iconColor}`} />
+            {typeof Icon === "string" ? (
+              <span className="text-2xl">{Icon}</span>
+            ) : (
+              <Icon className={`h-8 w-8 ${iconColor}`} />
+            )}
             <Button
               variant="ghost"
               size="icon"
@@ -41,7 +46,7 @@ export const StatCard: React.FC<StatCardProps> = ({
             </Button>
           </div>
           <div className="flex flex-grow flex-col items-center justify-center text-center">
-            <p className="text-sm font-medium text-muted-foreground">{title}</p>
+            <p className="font-medium text-muted-foreground">{title}</p>
             <p className="text-3xl font-bold">{value}</p>
           </div>
         </div>

@@ -26,4 +26,16 @@ export const roundRouter = createTRPCRouter({
         .innerJoin(answers, eq(rounds.answerId, answers.answerId));
       return query[0]?.count ?? 0;
     }),
+  totalRoundCount: publicProcedure
+    .input(z.object({ playerId: z.string() }))
+    .query(async ({ input, ctx }) => {
+      const query = await ctx.db
+        .select({
+          count: count(rounds.roundId),
+        })
+        .from(rounds)
+        .where(eq(games.playerId, input.playerId))
+        .innerJoin(games, eq(rounds.gameId, games.gameId));
+      return query[0]?.count ?? 0;
+    }),
 });

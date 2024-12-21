@@ -12,7 +12,7 @@ import {
 } from "./_components/dashboard/SummaryCards";
 import Map from "./_components/map/Map";
 import Dashboard from "./_components/dashboard/Dashboard";
-import { getFlagEmoji } from "~/utils";
+import { getCountryFlagEmoji } from "~/utils";
 
 export default async function Page({
   params,
@@ -44,7 +44,7 @@ export default async function Page({
         <div>
           <h1 className="text-3xl font-bold">{player.nick}</h1>
           <p className="text-gray-600">
-            {getFlagEmoji(player?.countryCode ?? "")}
+            {getCountryFlagEmoji(player?.countryCode ?? "")}
           </p>
         </div>
       </div>

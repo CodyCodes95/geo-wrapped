@@ -1,11 +1,9 @@
 "use client";
 import { Globe2Icon, MapIcon, TargetIcon, TrophyIcon } from "lucide-react";
-import { usePathname } from "next/navigation";
-import { Card, CardContent, CardHeader, CardTitle } from "~/components/ui/card";
 import { usePlayerId } from "./_hooks/usePlayerId";
 import { api } from "~/trpc/react";
 import { StatCard } from "./StatCard";
-import { getFlagEmoji } from "~/utils";
+import { getCountryFlagEmoji } from "~/utils";
 import { useRainboltMode } from "./_hooks/useRainboltMode";
 import { cn } from "~/lib/utils";
 
@@ -14,8 +12,8 @@ export const SummaryCards = () => {
   if (isRainboltMode) {
     return (
       <>
-        <TotalGamesCard />
-        <AverageScoreCard />
+        <ThailandRegionCard />
+        <TimedOutCard />
         <GuessesInObamaCard />
         <MooDengCard />
       </>
@@ -32,6 +30,73 @@ export const SummaryCards = () => {
   );
 };
 
+const ThailandRegionCard = () => {
+  const playerId = usePlayerId()!;
+  const { data: guesses } = api.guesses.thailandRegionGuesses.useQuery({
+    playerId,
+  });
+  return (
+    <StatCard
+      icon={getCountryFlagEmoji("TH")}
+      iconColor="text-green-500"
+      title={`Thailand Region Guesses (withim 100km)`}
+      value={guesses?.hundredKm?.length ?? 0}
+      detailedContent={
+        <div>
+          <h3 className="mb-2 text-lg font-semibold">MooDeng Breakdown</h3>
+          <ul className="flex flex-col gap-2">
+            <li>
+              {"5k's"} in Thailand: {guesses?.fiveK?.length ?? 0}
+            </li>
+            <li>
+              Thailand guesses within 50km: {guesses?.fiftyKm?.length ?? 0}
+            </li>
+            <li>
+              Thailand guesses within 100km: {guesses?.hundredKm?.length ?? 0}
+            </li>
+          </ul>
+        </div>
+      }
+    />
+  );
+};
+
+export const TimedOutCard = () => {
+  const playerId = usePlayerId()!;
+  const { data: guesses } = api.guesses.timedOutGuesses.useQuery({
+    playerId,
+  });
+  const { data: totalRoundCount } = api.rounds.totalRoundCount.useQuery({
+    playerId,
+  });
+  return (
+    <StatCard
+      icon={"😂🫵"}
+      iconColor="text-green-500"
+      title={`Timed Out Guesses 💀`}
+      value={guesses?.[0]?.count ?? 0}
+      detailedContent={
+        <div className="flex flex-col gap-2">
+          <p>
+            Out of
+            {totalRoundCount} rounds, you timed out{" "}
+            <span className="text-primary">{guesses?.[0]?.count} </span>
+            times.
+          </p>
+          <p>
+            Thats{" "}
+            {(
+              ((guesses?.[0]?.count ?? 0) / (totalRoundCount ?? 0)) *
+              100
+            ).toFixed(2)}
+            % of your rounds 💀
+          </p>
+        </div>
+      }
+    />
+  );
+};
+
 export const MooDengCard = () => {
   const playerId = usePlayerId()!;
   const { data: guesses } = api.guesses.guessesNearMoodeng.useQuery({
@@ -39,9 +104,8 @@ export const MooDengCard = () => {
   });
   return (
     <StatCard
-      icon={TargetIcon}
-      iconColor="text-green-500"
-      title={`Moo Deng Guesses ${getFlagEmoji("TH")}`}
+      icon={getCountryFlagEmoji("TH")}
+      title={"Moo Deng Guesses"}
       value={guesses?.mooDengGuesses ?? 0}
       detailedContent={
         <MooDengDetail
@@ -82,9 +146,9 @@ export const GuessesInObamaCard = () => {
   });
   return (
     <StatCard
-      icon={TargetIcon}
+      icon={getCountryFlagEmoji("JP")}
       iconColor="text-green-500"
-      title={`Guesses in Obama ${getFlagEmoji("JP")}`}
+      title={`Guesses in Obama`}
       value={guesses?.[0]?.count ?? 0}
       detailedContent={
         <ObamaDetail guessesInObama={guesses?.[0]?.count ?? 0} />
@@ -148,7 +212,8 @@ export const ObamaDetail = ({ guessesInObama }: { guessesInObama: number }) => {
 
 export const TotalGamesCard = () => {
   const id = usePlayerId()!;
-
+  const { data: gamesTypes } = api.games.gameTypes.useQuery({ id });
+  const { data: gamesModes } = api.games.gameModes.useQuery({ id });
   const { data: count } = api.games.getTotalGamesCount.useQuery({ id });
   return (
     <StatCard
@@ -159,10 +224,27 @@ export const TotalGamesCard = () => {
       detailedContent={
         <div>
           <h3 className="mb-2 text-lg font-semibold">Game Breakdown</h3>
-          <ul className="space-y-1">
-            <li>Single Player: 100</li>
-            <li>Multiplayer: 40</li>
-            <li>Challenges: 10</li>
+          <ul className="flex flex-col gap-2">
+            <li className="flex w-full items-center justify-between">
+              <span>Standard:</span>
+              <span className="text-primary">{gamesTypes?.standard}</span>
+            </li>
+            <li className="flex w-full items-center justify-between">
+              <span>Duels:</span>
+              <span className="text-primary">{gamesTypes?.duel}</span>
+            </li>
+            <li className="flex w-full items-center justify-between">
+              <span>Moving</span>
+              <span className="text-primary">{gamesModes?.standard}</span>
+            </li>
+            <li className="flex w-full items-center justify-between">
+              <span>No Move</span>
+              <span className="text-primary">{gamesModes?.noMove}</span>
+            </li>
+            <li className="flex w-full items-center justify-between">
+              <span>NPMZ</span>
+              <span className="text-primary">{gamesModes?.nmpz}</span>
+            </li>
           </ul>
         </div>
       }
@@ -175,6 +257,24 @@ export const AverageScoreCard = () => {
   const { data: avgScore } = api.guesses.getAverageScore.useQuery({
     playerId,
   });
+
+  const { data: fiveKGuesses } = api.guesses.fiveKGuesses.useQuery({
+    playerId,
+  });
+
+  const { data: zeroScoreGuesses } = api.guesses.zeroScoreGuesses.useQuery({
+    playerId,
+  });
+
+  const { data: correctCountryGuesses } =
+    api.guesses.correctCountryGuesses.useQuery({
+      playerId,
+    });
+
+  const { data: totalRoundCount } = api.rounds.totalRoundCount.useQuery({
+    playerId,
+  });
+
   return (
     <StatCard
       icon={TargetIcon}
@@ -183,11 +283,30 @@ export const AverageScoreCard = () => {
       value={avgScore ?? 0}
       detailedContent={
         <div>
-          <h3 className="mb-2 text-lg font-semibold">Game Breakdown</h3>
-          <ul className="space-y-1">
-            <li>Single Player: 100</li>
-            <li>Multiplayer: 40</li>
-            <li>Challenges: 10</li>
+          <h3 className="mb-2 text-lg font-semibold">Score Breakdown</h3>
+          <ul className="flex w-full flex-col gap-2">
+            <li className="flex w-full items-center justify-between">
+              <span>Total rounds:</span>
+              <span className="text-primary">{totalRoundCount}</span>
+            </li>
+            <li className="flex w-full items-center justify-between">
+              <span>{"5k's"}:</span>
+              <span className="text-primary">
+                {fiveKGuesses?.[0]?.count ?? 0}
+              </span>
+            </li>
+            <li className="flex w-full items-center justify-between">
+              <span>0 score guesses:</span>
+              <span className="text-primary">
+                {zeroScoreGuesses?.[0]?.count ?? 0}
+              </span>
+            </li>
+            <li className="flex w-full items-center justify-between">
+              <span>Correct country guesses:</span>
+              <span className="text-primary">
+                {correctCountryGuesses?.[0]?.count ?? 0} / {totalRoundCount}
+              </span>
+            </li>
           </ul>
         </div>
       }
@@ -232,14 +351,14 @@ export const TopCountryCard = () => {
       icon={Globe2Icon}
       iconColor="text-blue-500"
       title="Top country"
-      value={getFlagEmoji(topCountries?.[0]?.country)}
+      value={getCountryFlagEmoji(topCountries?.[0]?.country)}
       detailedContent={
         <div>
           <h3 className="mb-2 text-lg font-semibold">Top countries</h3>
           <ul className="space-y-1">
             {topCountries?.map((country) => (
               <li key={country.country}>
-                {getFlagEmoji(country.country)}: {country.count}
+                {getCountryFlagEmoji(country.country)}: {country.count}
               </li>
             ))}
           </ul>

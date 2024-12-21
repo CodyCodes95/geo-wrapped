@@ -15,6 +15,43 @@ export const gameRouter = createTRPCRouter({
 
       return gamesCount[0]?.count;
     }),
+  gameTypes: publicProcedure
+    .input(z.object({ id: z.string() }))
+    .query(async ({ input, ctx }) => {
+      const query = await ctx.db
+        .select({
+          count: count(games.gameId),
+          type: games.type,
+        })
+        .from(games)
+        .where(eq(games.playerId, input.id))
+        .groupBy(games.type)
+        .orderBy(desc(count(games.type)));
+
+      return {
+        standard: query.find((t) => t.type === "Standard")?.count ?? 0,
+        duel: query.find((t) => t.type === "Duel")?.count ?? 0,
+      };
+    }),
+  gameModes: publicProcedure
+    .input(z.object({ id: z.string() }))
+    .query(async ({ input, ctx }) => {
+      const query = await ctx.db
+        .select({
+          count: count(games.gameId),
+          mode: games.mode,
+        })
+        .from(games)
+        .where(eq(games.playerId, input.id))
+        .groupBy(games.mode)
+        .orderBy(desc(count(games.mode)));
+
+      return {
+        standard: query.find((t) => t.mode === "Standard")?.count ?? 0,
+        noMove: query.find((t) => t.mode === "NoMove")?.count ?? 0,
+        nmpz: query.find((t) => t.mode === "NMPZ")?.count ?? 0,
+      }
+    }),
   getFavouriteMaps: publicProcedure
     .input(z.object({ id: z.string() }))
     .query(async ({ input, ctx }) => {
