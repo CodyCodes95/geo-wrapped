@@ -2,29 +2,19 @@
 import React from "react";
 import { APIProvider, Map as GoogleMap } from "@vis.gl/react-google-maps";
 import { env } from "~/env";
-import { type players } from "~/server/db/schema";
 import { api } from "~/trpc/react";
 import { ClusteredMarkers } from "./ClusteredMarkers";
-
-export type Location = {
-  location: {
-    lng: number;
-    lat: number;
-  };
-  key: string;
-};
-
-type MapProps = {
-  player: typeof players.$inferInsert;
-};
+import { usePlayerId } from "../dashboard/_hooks/usePlayerId";
 
 console.log(env.NEXT_PUBLIC_GOOGLE_API_KEY);
 
-const Map = ({ player }: MapProps) => {
-  const { data: guesses } = api.guesses.getAll.useQuery(
-    { geoGuessrId: player.geoguessrId! },
-    { enabled: !!player?.geoguessrId },
+const Map = () => {
+  const playerId = usePlayerId()!;
+  const { data: rounds } = api.games.getAllWithResults.useQuery(
+    { playerId: playerId },
+    { enabled: !!playerId },
   );
+
   return (
     <APIProvider apiKey={env.NEXT_PUBLIC_GOOGLE_API_KEY}>
       <GoogleMap
@@ -35,7 +25,7 @@ const Map = ({ player }: MapProps) => {
         gestureHandling={"greedy"}
         disableDefaultUI={true}
       >
-        {guesses && <ClusteredMarkers locations={guesses} />}
+        {rounds && <ClusteredMarkers rounds={rounds} />}
       </GoogleMap>
     </APIProvider>
   );

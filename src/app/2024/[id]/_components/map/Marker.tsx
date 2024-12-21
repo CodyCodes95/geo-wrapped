@@ -1,41 +1,40 @@
 import type { Marker as MarkerType } from "@googlemaps/markerclusterer";
 import React, { useCallback } from "react";
 import { AdvancedMarker, Marker } from "@vis.gl/react-google-maps";
-import { type Location } from "./Map";
+import { type Round } from "./ClusteredMarkers";
 
-export type TreeMarkerProps = {
-  location: Location;
-  onClick: (tree: Location) => void;
+export type LocationMarkerProps = {
+  location: Round;
+  onClick: (round: Round) => void;
   setMarkerRef: (marker: MarkerType | null, key: string) => void;
+  avatarUrl: string;
 };
 
-/**
- * Wrapper Component for an AdvancedMarker for a single tree.
- */
-export const LocationMarker = (props: TreeMarkerProps) => {
-  const { location, onClick, setMarkerRef } = props;
+export const LocationMarker = (props: LocationMarkerProps) => {
+  const { location, onClick, setMarkerRef, avatarUrl } = props;
 
   const handleClick = useCallback(() => onClick(location), [onClick, location]);
   const ref = useCallback(
-    (marker: MarkerType | null) => setMarkerRef(marker, location.key),
-    [setMarkerRef, location.key],
+    (marker: MarkerType | null) => setMarkerRef(marker, location.roundId),
+    [setMarkerRef, location.roundId],
   );
 
   return (
-    <Marker
-      position={location.location}
+    <AdvancedMarker
+      position={{
+        lat: location.guess.lat,
+        lng: location.guess.lng,
+      }}
       ref={ref}
       onClick={() => {
         handleClick();
         // window.location.href = `http://maps.google.com/maps?q=&layer=c&cbll=${location.location.lat},${location.location.lng}`;
       }}
-    />
-    // <AdvancedMarker
-    //   position={location.location}
-    //   ref={ref}
-    //   onClick={handleClick}
-    // >
-    //   <span className="marker-clustering-tree">🌳</span>
-    // </AdvancedMarker>
+    >
+      <img
+        className="h-7 w-7 rounded-full border-2 border-white"
+        src={`https://www.geoguessr.com/images/resize:auto:96:96/gravity:ce/plain/${avatarUrl}`}
+      />
+    </AdvancedMarker>
   );
 };

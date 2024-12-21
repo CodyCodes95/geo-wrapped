@@ -1,5 +1,5 @@
 import * as React from "react";
-import Navigation from "./wrapped/components/Navigation";
+import Navigation from "./_components/dashboard/Navigation";
 
 export default function DashboardLayout({
   children,

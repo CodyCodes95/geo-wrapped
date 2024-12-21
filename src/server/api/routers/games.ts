@@ -1,8 +1,8 @@
-import { count, countDistinct, eq } from "drizzle-orm";
+import { and, count, countDistinct, desc, eq, not } from "drizzle-orm";
 import { z } from "zod";
 
 import { createTRPCRouter, publicProcedure } from "~/server/api/trpc";
-import { games } from "~/server/db/schema";
+import { answers, games, guesses, rounds } from "~/server/db/schema";
 
 export const gameRouter = createTRPCRouter({
   getTotalGamesCount: publicProcedure
@@ -15,20 +15,51 @@ export const gameRouter = createTRPCRouter({
 
       return gamesCount[0]?.count;
     }),
-  getFavouriteMap: publicProcedure
+  getFavouriteMaps: publicProcedure
     .input(z.object({ id: z.string() }))
     .query(async ({ input, ctx }) => {
       const gamesCount = await ctx.db
-        .select({ count: countDistinct(games.mapName), mapName: games.mapName })
+        .select({ count: count(games.gameId), mapName: games.mapName })
         .from(games)
-        .where(eq(games.playerId, input.id));
-        
-        
+        .where(eq(games.playerId, input.id))
+        .groupBy(games.mapName)
+        .orderBy(desc(count(games.mapName)));
 
-      const highestCount = gamesCount.reduce((a, b) => {
-        return a.count > b.count ? a : b;
+      return gamesCount;
+    }),
+  getAll: publicProcedure
+    .input(z.object({ playerId: z.string() }))
+    .query(async ({ input, ctx }) => {
+      const query = await ctx.db.query.games.findMany({
+        where: eq(games.playerId, input.playerId),
       });
+      return query;
+    }),
 
-      return highestCount.mapName;
+  getAllWithResults: publicProcedure
+    .input(z.object({ playerId: z.string() }))
+    .query(async ({ input, ctx }) => {
+      const query = await ctx.db
+        .select({
+          gameId: games.gameId,
+          roundId: rounds.roundId,
+          answerId: answers.answerId,
+          guessId: guesses.guessId,
+          answer: answers,
+          guess: guesses,
+        })
+        .from(games)
+        .innerJoin(rounds, eq(games.gameId, rounds.gameId))
+        .innerJoin(answers, eq(rounds.answerId, answers.answerId))
+        .innerJoin(guesses, eq(rounds.roundId, guesses.roundId))
+        .where(
+          and(
+            eq(games.playerId, input.playerId),
+            not(eq(guesses.lat, 0)),
+            not(eq(guesses.lng, 0)),
+          ),
+        );
+
+      return query;
     }),
 });

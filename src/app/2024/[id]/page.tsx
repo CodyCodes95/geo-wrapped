@@ -9,8 +9,10 @@ import {
   AverageScoreCard,
   FavouriteMapCard,
   TotalGamesCard,
-} from "./_components/SummaryCards";
+} from "./_components/dashboard/SummaryCards";
 import Map from "./_components/map/Map";
+import Dashboard from "./_components/dashboard/Dashboard";
+import { getFlagEmoji } from "~/utils";
 
 export default async function Page({
   params,
@@ -19,14 +21,6 @@ export default async function Page({
 }) {
   const id = (await params).id;
   const player = await api.players.getPlayer({ id });
-
-  function getFlagEmoji(countryCode: string) {
-    const codePoints = countryCode
-      .toUpperCase()
-      .split("")
-      .map((char) => 127397 + char.charCodeAt(0));
-    return String.fromCodePoint(...codePoints);
-  }
 
   if (!player) {
     notFound();
@@ -41,7 +35,10 @@ export default async function Page({
       {/* Profile Header */}
       <div className="flex items-center space-x-6 rounded-lg p-6 shadow-sm">
         <Avatar className="h-24 w-24">
-          <AvatarImage src={player.avatarUrl!} alt={player.nick!} />
+          <AvatarImage
+            src={`https://www.geoguessr.com/images/resize:auto:96:96/gravity:ce/plain/${player.avatarUrl}`}
+            alt={player.nick!}
+          />
           <AvatarFallback>{player.nick}</AvatarFallback>
         </Avatar>
         <div>
@@ -52,46 +49,7 @@ export default async function Page({
         </div>
       </div>
 
-      {/* Stats Overview */}
-      <div className="grid grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-4">
-        <TotalGamesCard />
-        <AverageScoreCard geoGuessrId={player.geoguessrId!} />
-        <Card>
-          <CardContent className="pt-6">
-            <div className="flex items-center space-x-2">
-              <Globe2 className="h-4 w-4 text-blue-500" />
-              <div className="space-y-1">
-                <p className="text-sm text-gray-500">Countries Visited</p>
-                <p className="text-2xl font-bold">42</p>
-              </div>
-            </div>
-          </CardContent>
-        </Card>
-        <FavouriteMapCard />
-      </div>
-
-      {/* Detailed Stats Tabs */}
-      <Tabs defaultValue="overview" className="space-y-4">
-        <TabsList>
-          <TabsTrigger value="overview">Overview</TabsTrigger>
-          <TabsTrigger value="maps">Maps</TabsTrigger>
-          <TabsTrigger value="achievements">Achievements</TabsTrigger>
-          <TabsTrigger value="history">History</TabsTrigger>
-        </TabsList>
-
-        <TabsContent value="overview" className="space-y-4">
-          <Card>
-            <CardHeader>
-              <CardTitle>Your guesses</CardTitle>
-            </CardHeader>
-            <CardContent>
-              <Map player={player} />
-            </CardContent>
-          </Card>
-        </TabsContent>
-
-        {/* Add other tab contents */}
-      </Tabs>
+      <Dashboard />
     </div>
   );
 }

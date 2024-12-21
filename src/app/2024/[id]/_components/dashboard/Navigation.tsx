@@ -1,7 +1,7 @@
 "use client";
 import React from "react";
-import { DarkModeToggle } from "../../_components/_layout/DarkModeToggle";
-import { MonthSelector } from "../../_components/_layout/MonthSelector";
+import { DarkModeToggle } from "../_layout/DarkModeToggle";
+import { MonthSelector } from "../_layout/MonthSelector";
 import { usePathname } from "next/navigation";
 
 const Navigation = () => {
@@ -10,7 +10,7 @@ const Navigation = () => {
   if (path.toLowerCase().includes("wrapped")) return null;
 
   return (
-    <nav className="sticky bg-primary-foreground top-0 z-50  shadow-lg">
+    <nav className="sticky top-0 z-50 bg-primary-foreground shadow-lg">
       <div className="mx-auto max-w-7xl px-4">
         <div className="flex h-14 items-center justify-between gap-4">
           <MonthSelector />

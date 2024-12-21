@@ -1,27 +1,33 @@
 import { InfoWindow, useMap } from "@vis.gl/react-google-maps";
 import React, { useCallback, useEffect, useMemo, useState } from "react";
 import { type Marker, MarkerClusterer } from "@googlemaps/markerclusterer";
-import { type Location } from "./Map";
 import { LocationMarker } from "./Marker";
+import { api, type GetAllGamesOutput } from "~/trpc/react";
+import { rounds } from "~/server/db/schema";
+import { usePlayerId } from "../dashboard/_hooks/usePlayerId";
 
 export type ClusteredMarkersProps = {
-  locations: Location[];
+  rounds: GetAllGamesOutput;
 };
+
+export type Round = NonNullable<GetAllGamesOutput[number]>;
 
 /**
  * The ClusteredMarkers component is responsible for integrating the
  * markers with the markerclusterer.
  */
-export const ClusteredMarkers = ({ locations }: ClusteredMarkersProps) => {
+export const ClusteredMarkers = ({ rounds }: ClusteredMarkersProps) => {
   const [markers, setMarkers] = useState<Record<string, Marker>>({});
-  const [selectedTreeKey, setSelectedTreeKey] = useState<string | null>(null);
+  const [selectedRoundId, setSelectedRoundId] = useState<string | null>(null);
+  const playerId = usePlayerId()!;
+  const { data: player } = api.players.getPlayer.useQuery({ id: playerId });
 
-  const selectedTree = useMemo(
+  const selectedRound = useMemo(
     () =>
-      locations && selectedTreeKey
-        ? locations.find((t) => t.key === selectedTreeKey)!
+      rounds && selectedRoundId
+        ? rounds.find((t) => t.roundId === selectedRoundId)!
         : null,
-    [locations, selectedTreeKey],
+    [rounds, selectedRoundId],
   );
 
   // create the markerClusterer once the map is available and update it when
@@ -58,30 +64,31 @@ export const ClusteredMarkers = ({ locations }: ClusteredMarkersProps) => {
   }, []);
 
   const handleInfoWindowClose = useCallback(() => {
-    setSelectedTreeKey(null);
+    setSelectedRoundId(null);
   }, []);
 
-  const handleMarkerClick = useCallback((location: Location) => {
-    setSelectedTreeKey(location.key);
+  const handleMarkerClick = useCallback((round: Round) => {
+    setSelectedRoundId(round.roundId);
   }, []);
 
   return (
     <>
-      {locations.map((location) => (
+      {rounds.map((round) => (
         <LocationMarker
-          key={location.key}
-          location={location}
+          key={round.roundId}
+          location={round}
           onClick={handleMarkerClick}
           setMarkerRef={setMarkerRef}
+          avatarUrl={player?.avatarUrl ?? ""}
         />
       ))}
 
-      {selectedTreeKey && (
+      {selectedRoundId && (
         <InfoWindow
-          anchor={markers[selectedTreeKey]}
+          anchor={markers[selectedRoundId]}
           onCloseClick={handleInfoWindowClose}
         >
-          {selectedTree?.key}
+          {selectedRound?.roundId}
         </InfoWindow>
       )}
     </>

@@ -20,16 +20,16 @@ export const MonthSelector = () => {
   ];
 
   return (
-    <div className="flex space-x-2 overflow-x-auto">
+    <div className="flex gap-2 overflow-x-auto">
       {months.map((month) => (
         <motion.button
           key={month}
-          whileHover={{ scale: 1.05 }}
-          whileTap={{ scale: 0.95 }}
+          whileHover={{ scale: 1.03 }}
+          whileTap={{ scale: 0.97 }}
           className={`whitespace-nowrap rounded-full px-3 py-1 text-sm ${
             selectedMonth === month
-              ? "bg-green-400 font-bold text-black"
-              : "text-white hover:bg-[#383838]"
+              ? "bg-primary font-bold"
+              : "hover:bg-secondary-foreground hover:text-primary-foreground"
           }`}
           onClick={() => setSelectedMonth(month)}
         >
