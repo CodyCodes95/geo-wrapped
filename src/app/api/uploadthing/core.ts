@@ -13,13 +13,13 @@ export const ourFileRouter = {
   // Define as many FileRoutes as you like, each with a unique routeSlug
   geoDataUploader: f({
     "text/csv": {
-      maxFileSize: "64MB",
+      maxFileSize: "16MB",
       maxFileCount: 1,
     },
   })
     // Set permissions and file types for this FileRoute
     // .middleware(async ({ req, files }) => {
-    //   console.log("files", files);
+    //   throw new Error("Not implemented");
     // })
     .onUploadComplete(async ({ metadata, file }) => {
       // This code RUNS ON YOUR SERVER after upload
@@ -36,7 +36,7 @@ export const ourFileRouter = {
 
       // !!! Whatever is returned here is sent to the clientside `onClientUploadComplete` callback
       // return { uploadedBy: metadata.userId };
-      return { url: `/${player?.[0]?.playerId}` };
+      return { url: `/2024/${player?.[0]?.playerId}/wrapped` };
     }),
 } satisfies FileRouter;
 

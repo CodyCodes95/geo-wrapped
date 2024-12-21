@@ -3,7 +3,6 @@ import React from "react";
 import { SummaryCards } from "./SummaryCards";
 import { Card, CardContent, CardHeader, CardTitle } from "~/components/ui/card";
 import Map from "../map/Map";
-import { usePlayerId } from "./_hooks/usePlayerId";
 import { useRainboltMode } from "./_hooks/useRainboltMode";
 
 const Dashboard = () => {
