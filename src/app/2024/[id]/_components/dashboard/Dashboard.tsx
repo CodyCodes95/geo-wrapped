@@ -1,14 +1,8 @@
 "use client";
 import React from "react";
 import { api } from "~/trpc/react";
-import {
-  AverageScoreCard,
-  FavouriteMapCard,
-  TopCountryCard,
-  TotalGamesCard,
-} from "./SummaryCards";
+import { SummaryCards } from "./SummaryCards";
 import { Card, CardContent, CardHeader, CardTitle } from "~/components/ui/card";
-import { Globe2Icon } from "lucide-react";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "~/components/ui/tabs";
 import Map from "../map/Map";
 import { usePlayerId } from "./_hooks/usePlayerId";
@@ -24,14 +18,9 @@ const Dashboard = () => {
   return (
     <>
       {/* Stats Overview */}
-      <div className="grid grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-4">
-        <TotalGamesCard />
-        <AverageScoreCard />
-        <TopCountryCard />
-        <div className="relative">
-          <FavouriteMapCard />
-          <RainboltMode />
-        </div>
+      <div className="relative grid grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-4">
+        <SummaryCards />
+        <RainboltMode />
       </div>
 
       {/* Detailed Stats Tabs */}

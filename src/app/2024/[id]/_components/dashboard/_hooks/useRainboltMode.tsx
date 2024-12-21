@@ -27,7 +27,11 @@ export const useRainboltMode = () => {
         <Tooltip delayDuration={0}>
           <TooltipTrigger asChild>
             <img
-              src="/obama.png"
+              src={
+                isRainboltMode
+                  ? "/timedoutguessyepitsrainbolttime.png"
+                  : "/obama.png"
+              }
               className="absolute -right-8 -top-10 h-16 w-20 cursor-pointer rounded-full"
               onClick={toggleRainboltMode}
             />

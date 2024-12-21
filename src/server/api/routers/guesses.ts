@@ -1,8 +1,37 @@
-import { and, avg, eq, not } from "drizzle-orm";
+import { and, avg, count, eq, gte, lte, not } from "drizzle-orm";
 import { z } from "zod";
 
 import { createTRPCRouter, publicProcedure } from "~/server/api/trpc";
 import { games, guesses, rounds } from "~/server/db/schema";
+
+const moodengCenter = {
+  lat: 13.216247039443203,
+  lng: 101.05681153985368,
+};
+
+const obamaBoundingBox = {
+  north: 35.5774,
+  south: 35.3844,
+  east: 135.8603,
+  west: 135.5887,
+};
+
+function calculateBoundingBox(lat: number, lng: number, radiusKm: number) {
+  const EARTH_RADIUS = 6371; // Earth's radius in kilometers
+
+  // Convert radius from kilometers to degrees
+  const latOffset = (radiusKm / EARTH_RADIUS) * (180 / Math.PI);
+  const lngOffset =
+    ((radiusKm / EARTH_RADIUS) * (180 / Math.PI)) /
+    Math.cos((lat * Math.PI) / 180);
+
+  return {
+    minLat: lat - latOffset,
+    maxLat: lat + latOffset,
+    minLng: lng - lngOffset,
+    maxLng: lng + lngOffset,
+  };
+}
 
 export const guessRouter = createTRPCRouter({
   getAverageScore: publicProcedure
@@ -19,6 +48,102 @@ export const guessRouter = createTRPCRouter({
 
       return Math.round(Number(query[0]?.scoreAverage) ?? 0);
     }),
+  guessesInObama: publicProcedure
+    .input(z.object({ playerId: z.string() }))
+    .query(async ({ input, ctx }) => {
+      const query = await ctx.db
+        .select({
+          count: count(guesses.guessId),
+        })
+        .from(guesses)
+        .where(
+          and(
+            eq(games.playerId, input.playerId),
+            gte(guesses.lng, 135.685842),
+            lte(guesses.lng, 135.8448),
+            gte(guesses.lat, 35.45665),
+            lte(guesses.lat, 35.535195),
+          ),
+        )
+        .innerJoin(rounds, eq(guesses.roundId, rounds.roundId))
+        .innerJoin(games, eq(rounds.gameId, games.gameId));
+      return query;
+    }),
+  guessesNearMoodeng: publicProcedure
+    .input(z.object({ playerId: z.string() }))
+    .query(async ({ input, ctx }) => {
+      const mooDengBoundingBox = calculateBoundingBox(
+        moodengCenter.lat,
+        moodengCenter.lng,
+        1,
+      );
+
+      const mooDeng10kmBoundingBox = calculateBoundingBox(
+        moodengCenter.lat,
+        moodengCenter.lng,
+        10,
+      );
+
+      const mooDeng50kmBoundingBox = calculateBoundingBox(
+        moodengCenter.lat,
+        moodengCenter.lng,
+        50,
+      );
+      const query = await ctx.db
+        .select({
+          lat: guesses.lat,
+          lng: guesses.lng,
+        })
+        .from(guesses)
+        .where(
+          and(
+            eq(games.playerId, input.playerId),
+            eq(guesses.countryCode, "th"),
+          ),
+        )
+        .innerJoin(rounds, eq(guesses.roundId, rounds.roundId))
+        .innerJoin(games, eq(rounds.gameId, games.gameId));
+
+      const mooDengGuesses = query.filter((row) => {
+        const lat = row.lat;
+        const lng = row.lng;
+        return (
+          lat >= mooDengBoundingBox.minLat &&
+          lat <= mooDengBoundingBox.maxLat &&
+          lng >= mooDengBoundingBox.minLng &&
+          lng <= mooDengBoundingBox.maxLng
+        );
+      });
+
+      const mooDeng10kmGuesses = query.filter((row) => {
+        const lat = row.lat;
+        const lng = row.lng;
+        return (
+          lat >= mooDeng10kmBoundingBox.minLat &&
+          lat <= mooDeng10kmBoundingBox.maxLat &&
+          lng >= mooDeng10kmBoundingBox.minLng &&
+          lng <= mooDeng10kmBoundingBox.maxLng
+        );
+      });
+
+      const mooDeng50kmGuesses = query.filter((row) => {
+        const lat = row.lat;
+        const lng = row.lng;
+        return (
+          lat >= mooDeng50kmBoundingBox.minLat &&
+          lat <= mooDeng50kmBoundingBox.maxLat &&
+          lng >= mooDeng50kmBoundingBox.minLng &&
+          lng <= mooDeng50kmBoundingBox.maxLng
+        );
+      });
+
+      return {
+        mooDengGuesses: mooDengGuesses.length,
+        mooDeng10kmGuesses: mooDeng10kmGuesses.length,
+        mooDeng50kmGuesses: mooDeng50kmGuesses.length,
+      };
+    }),
+
   getAll: publicProcedure
     .input(z.object({ geoGuessrId: z.string() }))
     .query(async ({ input, ctx }) => {
