@@ -43,7 +43,7 @@ export default async function Page({
         </Avatar>
         <div>
           <h1 className="text-3xl font-bold">{player.nick}</h1>
-          <p className="text-gray-600">
+          <p className="text-2xl">
             {getCountryFlagEmoji(player?.countryCode ?? "")}
           </p>
         </div>
