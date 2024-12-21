@@ -1,4 +1,16 @@
-import { and, avg, count, desc, eq, gte, lte, ne, not, sql } from "drizzle-orm";
+import {
+  and,
+  asc,
+  avg,
+  count,
+  desc,
+  eq,
+  gte,
+  lte,
+  ne,
+  not,
+  sql,
+} from "drizzle-orm";
 import { z } from "zod";
 
 import { createTRPCRouter, publicProcedure } from "~/server/api/trpc";
@@ -326,14 +338,19 @@ export const guessRouter = createTRPCRouter({
       const query = await ctx.db
         .select({
           country: answers.countryCode,
-          correctGuesses: sql`count(case when ${answers.countryCode} = ${guesses.countryCode} then 1 end)`,
+          correctGuesses: sql<number>`count(case when ${answers.countryCode} = ${guesses.countryCode} then 1 end)`,
           totalGuesses: count(answers.answerId),
         })
         .from(answers)
         .innerJoin(rounds, eq(rounds.answerId, answers.answerId))
         .innerJoin(guesses, eq(rounds.roundId, guesses.roundId))
         .innerJoin(games, eq(rounds.gameId, games.gameId))
-        .where(eq(games.playerId, playerId))
+        .where(
+          and(
+            eq(games.playerId, playerId),
+            not(eq(answers.countryCode, "Unknown")),
+          ),
+        )
         .groupBy(answers.countryCode)
         .orderBy(
           desc(
@@ -351,7 +368,8 @@ export const guessRouter = createTRPCRouter({
       return ctx.db
         .select({
           country: answers.countryCode,
-          total: count(),
+          correctGuesses: sql<number>`count(case when ${answers.countryCode} = ${guesses.countryCode} then 1 end)`,
+          totalGuesses: count(answers.answerId),
         })
         .from(answers)
         .innerJoin(rounds, eq(rounds.answerId, answers.answerId))
@@ -360,11 +378,15 @@ export const guessRouter = createTRPCRouter({
         .where(
           and(
             eq(games.playerId, playerId),
-            ne(answers.countryCode, guesses.countryCode),
+            not(eq(answers.countryCode, "Unknown")),
           ),
         )
         .groupBy(answers.countryCode)
-        .orderBy(desc(count()))
+        .orderBy(
+          asc(
+            sql<number>`count(case when ${answers.countryCode} = ${guesses.countryCode} then 1 end)`,
+          ),
+        )
         .limit(4);
     }),
 });

@@ -7,6 +7,7 @@ import { ListeningClockSlide } from "./slides/ListeningClockSlide";
 import { TopSongSlide } from "./slides/TopSongSlide";
 import { SummarySlide } from "./slides/SummarySlide";
 import { StrongestCountries, WeakestCountries } from "./Slides";
+import { type WrappedStats } from "../page";
 
 export type YearStats = {
   topGenre: {
@@ -102,7 +103,7 @@ const slides = [
   SummarySlide,
 ];
 
-const Wrapped = () => {
+const Wrapped = ({ stats }: { stats: WrappedStats }) => {
   const [currentSlide, setCurrentSlide] = useState(0);
 
   const handleKeyDown = (e: KeyboardEvent) => {
@@ -130,9 +131,9 @@ const Wrapped = () => {
         transition={{ duration: 0.3 }}
       >
         {currentSlide === 0 ? (
-          <CurrentSlideComponent stats={yearStats} />
+          <CurrentSlideComponent stats={stats} />
         ) : (
-          <CurrentSlideComponent stats={yearStats} />
+          <CurrentSlideComponent stats={stats} />
         )}
       </motion.div>
     </AnimatePresence>

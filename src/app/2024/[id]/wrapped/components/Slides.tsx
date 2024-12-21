@@ -1,6 +1,13 @@
 import { motion } from "framer-motion";
 import { getCountryFlagEmoji } from "~/utils";
 import { type YearStats } from "./Wrapped";
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipProvider,
+  TooltipTrigger,
+} from "~/components/ui/tooltip";
+import { getCountryName } from "~/utils/countryCodes";
 
 type Props = {
   stats: YearStats;
@@ -12,7 +19,7 @@ export const WeakestCountries = ({ stats }: Props) => (
       Your Weakest Countries
     </h1>
     <div className="mb-12 text-gray-400">
-      Imagine not getting these right 💀
+      Imagine not getting these wrong 💀
     </div>
 
     <div className="grid max-w-2xl grid-cols-2 gap-8">
@@ -22,11 +29,18 @@ export const WeakestCountries = ({ stats }: Props) => (
           initial={{ x: index % 2 === 0 ? -50 : 50, opacity: 0 }}
           animate={{ x: 0, opacity: 1 }}
           transition={{ delay: index * 0.2 }}
-          className="text-center"
+          className="flex flex-col gap-2 text-center"
         >
-          <div className="mb-4 text-6xl">
-            {getCountryFlagEmoji(stat.country)}
-          </div>
+          <TooltipProvider>
+            <Tooltip delayDuration={0}>
+              <TooltipTrigger className="cursor-pointer text-6xl">
+                {getCountryFlagEmoji(stat.country)}
+              </TooltipTrigger>
+              <TooltipContent>
+                <span>{getCountryName(stat.country)}</span>
+              </TooltipContent>
+            </Tooltip>
+          </TooltipProvider>
           <p>
             Guessed correctly {stat.correctGuesses} out of {stat.totalGuesses}{" "}
             rounds
@@ -53,11 +67,18 @@ export const StrongestCountries = ({ stats }: Props) => (
           initial={{ x: index % 2 === 0 ? -50 : 50, opacity: 0 }}
           animate={{ x: 0, opacity: 1 }}
           transition={{ delay: index * 0.2 }}
-          className="text-center"
+          className="flex flex-col gap-2 text-center"
         >
-          <div className="mb-4 text-6xl">
-            {getCountryFlagEmoji(stat.country)}
-          </div>
+          <TooltipProvider>
+            <Tooltip delayDuration={0}>
+              <TooltipTrigger className="cursor-pointer text-6xl">
+                {getCountryFlagEmoji(stat.country)}
+              </TooltipTrigger>
+              <TooltipContent>
+                <span>{getCountryName(stat.country)}</span>
+              </TooltipContent>
+            </Tooltip>
+          </TooltipProvider>
           <p>
             Guessed correctly {stat.correctGuesses} out of {stat.totalGuesses}{" "}
             rounds
