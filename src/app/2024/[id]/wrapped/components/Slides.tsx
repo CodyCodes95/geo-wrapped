@@ -159,7 +159,9 @@ export const ScoreSlide = ({ stats }: Props) => {
           <span className="text-5xl font-bold text-primary">
             {Math.round(stats.scoreStats.avgTime)}s
           </span>
-          <span className="text-xl text-muted-foreground">Average Time</span>
+          <span className="text-xl text-muted-foreground">
+            Average Time To Guess
+          </span>
           <span className="text-sm text-muted-foreground">
             Seconds per guess
           </span>
@@ -180,6 +182,14 @@ export const ScoreSlide = ({ stats }: Props) => {
           <span className="text-sm text-muted-foreground">Kilometers off</span>
         </motion.div>
       </div>
+    </div>
+  );
+};
+
+export const CompteitivePerformanceSlide = ({ stats }: Props) => {
+  return (
+    <div>
+      <p></p>
     </div>
   );
 };

@@ -282,7 +282,7 @@ export const wrappedRouter = createTRPCRouter({
           zeroScores: sql<number>`COUNT(CASE WHEN ${guesses.points} = 0 THEN 1 END)`,
           avgScore: avg(guesses.points),
           avgTime: avg(guesses.timeInSeconds),
-          avgDistance: avg(guesses.distanceInMeters),
+          avgDistance: sql<number>`AVG(CASE WHEN ${guesses.timedOut} = 0 THEN ${guesses.distanceInMeters} END)`,
           timedOutGuesses: sql<number>`COUNT(CASE WHEN ${guesses.timedOut} = 1 THEN 1 END)`,
         })
         .from(guesses)
