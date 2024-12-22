@@ -74,7 +74,7 @@ const Markers = () => {
       <>
         <Button
           onClick={clearSelectedRounds}
-          className="absolute -top-10 right-0"
+          className="absolute bottom-0 right-0"
         >
           Clear selected rounds
         </Button>
