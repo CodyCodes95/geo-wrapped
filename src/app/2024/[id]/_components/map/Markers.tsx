@@ -128,6 +128,7 @@ const Markers = () => {
               key={`cluster-${cluster.id}`}
               position={{ lat: lat!, lng: lng! }}
               count={pointCount}
+              avatarUrl={player?.avatarUrl ?? ""}
             />
           );
         }
