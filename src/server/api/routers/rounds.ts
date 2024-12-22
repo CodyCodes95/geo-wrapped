@@ -7,7 +7,12 @@ import { getMonthTimestampRange } from "~/utils";
 
 export const roundRouter = createTRPCRouter({
   roundsInObama: publicProcedure
-    .input(z.object({ playerId: z.string(), selectedMonth: z.string() }))
+    .input(
+      z.object({
+        playerId: z.string(),
+        selectedMonth: z.union([z.string(), z.null()]),
+      }),
+    )
     .query(async ({ input, ctx }) => {
       const { start, end } = getMonthTimestampRange(input.selectedMonth);
       const query = await ctx.db
@@ -31,7 +36,12 @@ export const roundRouter = createTRPCRouter({
       return query[0]?.count ?? 0;
     }),
   totalRoundCount: publicProcedure
-    .input(z.object({ playerId: z.string(), selectedMonth: z.string() }))
+    .input(
+      z.object({
+        playerId: z.string(),
+        selectedMonth: z.union([z.string(), z.null()]),
+      }),
+    )
     .query(async ({ input, ctx }) => {
       const { start, end } = getMonthTimestampRange(input.selectedMonth);
       const query = await ctx.db

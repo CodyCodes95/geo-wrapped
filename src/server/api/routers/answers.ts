@@ -7,7 +7,12 @@ import { getMonthTimestampRange } from "~/utils";
 
 export const answerRouter = createTRPCRouter({
   getTopCountries: publicProcedure
-    .input(z.object({ playerId: z.string(), selectedMonth: z.string() }))
+    .input(
+      z.object({
+        playerId: z.string(),
+        selectedMonth: z.union([z.string(), z.null()]),
+      }),
+    )
     .query(async ({ input, ctx }) => {
       const { start, end } = getMonthTimestampRange(input.selectedMonth);
       const query = await ctx.db

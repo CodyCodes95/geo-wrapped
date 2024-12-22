@@ -83,7 +83,12 @@ function calculateBoundingBox(lat: number, lng: number, radiusKm: number) {
 
 export const guessRouter = createTRPCRouter({
   getAverageScore: publicProcedure
-    .input(z.object({ playerId: z.string(), selectedMonth: z.string() }))
+    .input(
+      z.object({
+        playerId: z.string(),
+        selectedMonth: z.union([z.string(), z.null()]),
+      }),
+    )
     .query(async ({ input, ctx }) => {
       const { start, end } = getMonthTimestampRange(input.selectedMonth);
 
@@ -105,7 +110,12 @@ export const guessRouter = createTRPCRouter({
       return Math.round(Number(query[0]?.scoreAverage) ?? 0);
     }),
   fiveKGuesses: publicProcedure
-    .input(z.object({ playerId: z.string(), selectedMonth: z.string() }))
+    .input(
+      z.object({
+        playerId: z.string(),
+        selectedMonth: z.union([z.string(), z.null()]),
+      }),
+    )
     .query(async ({ input, ctx }) => {
       const { start, end } = getMonthTimestampRange(input.selectedMonth);
       const query = await ctx.db
@@ -126,7 +136,12 @@ export const guessRouter = createTRPCRouter({
       return query;
     }),
   zeroScoreGuesses: publicProcedure
-    .input(z.object({ playerId: z.string(), selectedMonth: z.string() }))
+    .input(
+      z.object({
+        playerId: z.string(),
+        selectedMonth: z.union([z.string(), z.null()]),
+      }),
+    )
     .query(async ({ input, ctx }) => {
       const { start, end } = getMonthTimestampRange(input.selectedMonth);
       const query = await ctx.db
@@ -147,7 +162,12 @@ export const guessRouter = createTRPCRouter({
       return query;
     }),
   correctCountryGuesses: publicProcedure
-    .input(z.object({ playerId: z.string(), selectedMonth: z.string() }))
+    .input(
+      z.object({
+        playerId: z.string(),
+        selectedMonth: z.union([z.string(), z.null()]),
+      }),
+    )
     .query(async ({ input, ctx }) => {
       const { start, end } = getMonthTimestampRange(input.selectedMonth);
       const query = await ctx.db
@@ -169,7 +189,12 @@ export const guessRouter = createTRPCRouter({
       return query;
     }),
   timedOutGuesses: publicProcedure
-    .input(z.object({ playerId: z.string(), selectedMonth: z.string() }))
+    .input(
+      z.object({
+        playerId: z.string(),
+        selectedMonth: z.union([z.string(), z.null()]),
+      }),
+    )
     .query(async ({ input, ctx }) => {
       const { start, end } = getMonthTimestampRange(input.selectedMonth);
       const query = await ctx.db
@@ -190,7 +215,12 @@ export const guessRouter = createTRPCRouter({
       return query;
     }),
   guessesInObama: publicProcedure
-    .input(z.object({ playerId: z.string(), selectedMonth: z.string() }))
+    .input(
+      z.object({
+        playerId: z.string(),
+        selectedMonth: z.union([z.string(), z.null()]),
+      }),
+    )
     .query(async ({ input, ctx }) => {
       const { start, end } = getMonthTimestampRange(input.selectedMonth);
       const query = await ctx.db
@@ -214,7 +244,12 @@ export const guessRouter = createTRPCRouter({
       return query;
     }),
   guessesNearMoodeng: publicProcedure
-    .input(z.object({ playerId: z.string(), selectedMonth: z.string() }))
+    .input(
+      z.object({
+        playerId: z.string(),
+        selectedMonth: z.union([z.string(), z.null()]),
+      }),
+    )
     .query(async ({ input, ctx }) => {
       const { start, end } = getMonthTimestampRange(input.selectedMonth);
       const mooDengBoundingBox = calculateBoundingBox(
@@ -289,7 +324,12 @@ export const guessRouter = createTRPCRouter({
       };
     }),
   thailandRegionGuesses: publicProcedure
-    .input(z.object({ playerId: z.string(), selectedMonth: z.string() }))
+    .input(
+      z.object({
+        playerId: z.string(),
+        selectedMonth: z.union([z.string(), z.null()]),
+      }),
+    )
     .query(async ({ input, ctx }) => {
       const { start, end } = getMonthTimestampRange(input.selectedMonth);
       const thailandGuesses = await ctx.db

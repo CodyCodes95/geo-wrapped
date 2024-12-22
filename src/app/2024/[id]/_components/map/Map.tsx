@@ -2,19 +2,10 @@
 import React from "react";
 import { APIProvider, Map as GoogleMap } from "@vis.gl/react-google-maps";
 import { env } from "~/env";
-import { api } from "~/trpc/react";
-import { ClusteredMarkers } from "./ClusteredMarkers";
-import { usePlayerId } from "../dashboard/_hooks/usePlayerId";
-import { useMonth } from "../_layout/MonthSelector";
+
+import Markers from "./Markers";
 
 const Map = () => {
-  const playerId = usePlayerId()!;
-  const { selectedMonth } = useMonth();
-  const { data: rounds } = api.games.getAllWithResults.useQuery(
-    { playerId: playerId, selectedMonth },
-    { enabled: !!playerId },
-  );
-
   return (
     <APIProvider apiKey={env.NEXT_PUBLIC_GOOGLE_API_KEY}>
       <GoogleMap
@@ -25,7 +16,7 @@ const Map = () => {
         gestureHandling={"greedy"}
         // disableDefaultUI={true}
       >
-        {rounds && <ClusteredMarkers rounds={rounds} />}
+        <Markers />
       </GoogleMap>
     </APIProvider>
   );

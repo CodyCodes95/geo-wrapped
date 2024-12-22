@@ -16,7 +16,12 @@ import { getMonthTimestampRange } from "~/utils";
 
 export const gameRouter = createTRPCRouter({
   getTotalGamesCount: publicProcedure
-    .input(z.object({ id: z.string(), selectedMonth: z.string() }))
+    .input(
+      z.object({
+        id: z.string(),
+        selectedMonth: z.union([z.string(), z.null()]),
+      }),
+    )
     .query(async ({ input, ctx }) => {
       const { start, end } = getMonthTimestampRange(input.selectedMonth);
       const gamesCount = await ctx.db
@@ -33,7 +38,12 @@ export const gameRouter = createTRPCRouter({
       return gamesCount[0]?.count;
     }),
   gameTypes: publicProcedure
-    .input(z.object({ id: z.string(), selectedMonth: z.string() }))
+    .input(
+      z.object({
+        id: z.string(),
+        selectedMonth: z.union([z.string(), z.null()]),
+      }),
+    )
     .query(async ({ input, ctx }) => {
       const { start, end } = getMonthTimestampRange(input.selectedMonth);
       const query = await ctx.db
@@ -58,7 +68,12 @@ export const gameRouter = createTRPCRouter({
       };
     }),
   gameModes: publicProcedure
-    .input(z.object({ id: z.string(), selectedMonth: z.string() }))
+    .input(
+      z.object({
+        id: z.string(),
+        selectedMonth: z.union([z.string(), z.null()]),
+      }),
+    )
     .query(async ({ input, ctx }) => {
       const { start, end } = getMonthTimestampRange(input.selectedMonth);
       const query = await ctx.db
@@ -84,7 +99,12 @@ export const gameRouter = createTRPCRouter({
       };
     }),
   getFavouriteMaps: publicProcedure
-    .input(z.object({ id: z.string(), selectedMonth: z.string() }))
+    .input(
+      z.object({
+        id: z.string(),
+        selectedMonth: z.union([z.string(), z.null()]),
+      }),
+    )
     .query(async ({ input, ctx }) => {
       const { start, end } = getMonthTimestampRange(input.selectedMonth);
       const gamesCount = await ctx.db
@@ -103,7 +123,12 @@ export const gameRouter = createTRPCRouter({
       return gamesCount;
     }),
   getAllWithResults: publicProcedure
-    .input(z.object({ playerId: z.string(), selectedMonth: z.string() }))
+    .input(
+      z.object({
+        playerId: z.string(),
+        selectedMonth: z.union([z.string(), z.null()]),
+      }),
+    )
     .query(async ({ input, ctx }) => {
       const { start, end } = getMonthTimestampRange(input.selectedMonth);
       const query = await ctx.db

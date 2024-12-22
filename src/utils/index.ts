@@ -8,8 +8,8 @@ export function getCountryFlagEmoji(countryCode: string | undefined) {
 }
 
 // Helper function to get timestamp range for a given month in 2024
-export function getMonthTimestampRange(month: string) {
-  if (month === "total") {
+export function getMonthTimestampRange(month: string | null) {
+  if (!month) {
     return {
       start: new Date("2024-01-01T00:00:00Z"),
       end: new Date("2024-12-31T23:59:59Z"),
