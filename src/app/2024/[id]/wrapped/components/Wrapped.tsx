@@ -1,14 +1,14 @@
 "use client";
 import React, { useEffect, useState } from "react";
 import { AnimatePresence, motion } from "framer-motion";
-import { TopSongSlide } from "./slides/TopSongSlide";
-import { SummarySlide } from "./slides/SummarySlide";
 import {
   WelcomeSlide,
   RecapSlide,
   StrongestCountries,
   WeakestCountries,
   ScoreSlide,
+  CompteitivePerformanceSlide,
+  SummarySlide,
 } from "./Slides";
 import { type WrappedStats } from "../page";
 
@@ -59,8 +59,8 @@ const slides = [
   ScoreSlide,
   StrongestCountries,
   WeakestCountries,
-  // TopSongSlide,
-  // SummarySlide,
+  CompteitivePerformanceSlide,
+  SummarySlide,
 ];
 
 const Wrapped = ({ stats }: { stats: WrappedStats }) => {
