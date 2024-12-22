@@ -270,4 +270,32 @@ export const wrappedRouter = createTRPCRouter({
         .limit(4);
       return query;
     }),
+
+  scoreStats: publicProcedure
+    .input(z.object({ playerId: z.string() }))
+    .query(async ({ input, ctx }) => {
+      const { playerId } = input;
+
+      const stats = await ctx.db
+        .select({
+          perfectScores: sql<number>`COUNT(CASE WHEN ${guesses.points} = 5000 AND ${guesses.timedOut} = 0 THEN 1 END)`,
+          zeroScores: sql<number>`COUNT(CASE WHEN ${guesses.points} = 0 THEN 1 END)`,
+          avgScore: avg(guesses.points),
+          avgTime: avg(guesses.timeInSeconds),
+          avgDistance: avg(guesses.distanceInMeters),
+          timedOutGuesses: sql<number>`COUNT(CASE WHEN ${guesses.timedOut} = 1 THEN 1 END)`,
+        })
+        .from(guesses)
+        .innerJoin(rounds, eq(rounds.roundId, guesses.roundId))
+        .innerJoin(games, eq(games.gameId, rounds.gameId))
+        .where(eq(games.playerId, playerId));
+      return {
+        timedOutGuesses: Number(stats[0]?.timedOutGuesses ?? 0),
+        perfectScores: Number(stats[0]?.perfectScores ?? 0),
+        zeroScores: Number(stats[0]?.zeroScores ?? 0),
+        avgScore: Number(stats[0]?.avgScore ?? 0),
+        avgTime: Number(stats[0]?.avgTime ?? 0),
+        avgDistance: Number(stats[0]?.avgDistance ?? 0) / 1000, // Convert to km
+      };
+    }),
 });

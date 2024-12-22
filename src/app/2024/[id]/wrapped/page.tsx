@@ -54,6 +54,14 @@ export type WrappedStats = {
     minutes: number;
     imageUrl: string;
   };
+  scoreStats: {
+    perfectScores: number;
+    zeroScores: number;
+    avgScore: number;
+    avgTime: number;
+    avgDistance: number;
+    timedOutGuesses: number;
+  };
 };
 
 export default async function Page({
@@ -75,6 +83,8 @@ export default async function Page({
   const totalStats = await api.wrapped.totalGamesSummary({ playerId: id });
   const topMap = await api.wrapped.topMap({ playerId: id });
   const bestGames = await api.wrapped.bestGames({ playerId: id });
+  const scoreStats = await api.wrapped.scoreStats({ playerId: id });
+
   const stats: WrappedStats = {
     totalStats,
     bestGames,
@@ -98,6 +108,7 @@ export default async function Page({
       minutes: 823,
       imageUrl: "https://source.unsplash.com/featured/400x400?album",
     },
+    scoreStats,
   };
   return <Wrapped stats={stats} />;
 }

@@ -96,7 +96,92 @@ export const RecapSlide = ({ stats }: Props) => {
 };
 
 export const ScoreSlide = ({ stats }: Props) => {
-  return void 1;
+  return (
+    <div className="flex min-h-screen flex-col items-center justify-center gap-8 bg-[#191414] p-4">
+      <motion.h1
+        initial={{ opacity: 0, y: -20 }}
+        animate={{ opacity: 1, y: 0 }}
+        className="text-4xl font-bold text-primary"
+      >
+        Your Guess Breakdown
+      </motion.h1>
+
+      <div className="grid grid-cols-1 gap-8 md:grid-cols-2 lg:grid-cols-3">
+        <motion.div
+          initial={{ scale: 0, opacity: 0 }}
+          animate={{ scale: 1, opacity: 1 }}
+          transition={{ delay: 0.2 }}
+          className="flex flex-col items-center gap-2 rounded-lg border border-primary/20 p-6 text-center"
+        >
+          <span className="text-5xl font-bold text-green-500">
+            {stats.scoreStats.perfectScores}
+          </span>
+          <span className="text-xl text-muted-foreground">{"5K's"}</span>
+          <span className="text-sm text-muted-foreground">Perfect scores</span>
+        </motion.div>
+
+        <motion.div
+          initial={{ scale: 0, opacity: 0 }}
+          animate={{ scale: 1, opacity: 1 }}
+          transition={{ delay: 0.4 }}
+          className="flex flex-col items-center gap-2 rounded-lg border border-primary/20 p-6 text-center"
+        >
+          <span className="text-5xl font-bold text-red-500">
+            {stats.scoreStats.zeroScores}
+          </span>
+          <span className="text-xl text-muted-foreground">Zero Scores</span>
+          <span className="text-sm text-muted-foreground">
+            {stats.scoreStats.timedOutGuesses} of those you timed out on 😂🫵
+          </span>
+        </motion.div>
+
+        <motion.div
+          initial={{ scale: 0, opacity: 0 }}
+          animate={{ scale: 1, opacity: 1 }}
+          transition={{ delay: 0.6 }}
+          className="flex flex-col items-center gap-2 rounded-lg border border-primary/20 p-6 text-center"
+        >
+          <span className="text-5xl font-bold text-primary">
+            {Math.round(stats.scoreStats.avgScore).toLocaleString()}
+          </span>
+          <span className="text-xl text-muted-foreground">Average Score</span>
+          <span className="text-sm text-muted-foreground">
+            Points per round
+          </span>
+        </motion.div>
+
+        <motion.div
+          initial={{ scale: 0, opacity: 0 }}
+          animate={{ scale: 1, opacity: 1 }}
+          transition={{ delay: 0.8 }}
+          className="flex flex-col items-center gap-2 rounded-lg border border-primary/20 p-6 text-center"
+        >
+          <span className="text-5xl font-bold text-primary">
+            {Math.round(stats.scoreStats.avgTime)}s
+          </span>
+          <span className="text-xl text-muted-foreground">Average Time</span>
+          <span className="text-sm text-muted-foreground">
+            Seconds per guess
+          </span>
+        </motion.div>
+
+        <motion.div
+          initial={{ scale: 0, opacity: 0 }}
+          animate={{ scale: 1, opacity: 1 }}
+          transition={{ delay: 1 }}
+          className="flex flex-col items-center gap-2 rounded-lg border border-primary/20 p-6 text-center"
+        >
+          <span className="text-5xl font-bold text-primary">
+            {Math.round(stats.scoreStats.avgDistance).toLocaleString()}
+          </span>
+          <span className="text-xl text-muted-foreground">
+            Average Distance
+          </span>
+          <span className="text-sm text-muted-foreground">Kilometers off</span>
+        </motion.div>
+      </div>
+    </div>
+  );
 };
 
 export const WeakestCountries = ({ stats }: Props) => (

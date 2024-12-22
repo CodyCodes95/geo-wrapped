@@ -1,7 +1,6 @@
 "use client";
 import React, { useEffect, useState } from "react";
 import { AnimatePresence, motion } from "framer-motion";
-import { ListeningClockSlide } from "./slides/ListeningClockSlide";
 import { TopSongSlide } from "./slides/TopSongSlide";
 import { SummarySlide } from "./slides/SummarySlide";
 import {
@@ -9,6 +8,7 @@ import {
   RecapSlide,
   StrongestCountries,
   WeakestCountries,
+  ScoreSlide,
 } from "./Slides";
 import { type WrappedStats } from "../page";
 
@@ -99,7 +99,7 @@ export const yearStats: YearStats = {
 const slides = [
   WelcomeSlide,
   RecapSlide,
-  ListeningClockSlide,
+  ScoreSlide,
   StrongestCountries,
   WeakestCountries,
   TopSongSlide,
