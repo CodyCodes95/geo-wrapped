@@ -1,3 +1,4 @@
+"use client";
 import { motion } from "framer-motion";
 import { getCountryFlagEmoji } from "~/utils";
 import { type YearStats } from "./Wrapped";
@@ -15,6 +16,27 @@ import Link from "next/link";
 type Props = {
   stats: WrappedStats;
 };
+
+export const ProcessingSlide = () => (
+  <motion.div
+    initial={{ opacity: 0 }}
+    animate={{ opacity: 1 }}
+    className="flex min-h-screen flex-col items-center justify-center bg-[#191414] text-center"
+  >
+    <h1 className="bg-gradient-to-r from-primary to-[#15cf4b] bg-clip-text text-6xl font-bold text-transparent">
+      We are processing your data. Come back soon to see the results!
+    </h1>
+    <div className="mt-4 text-xl text-primary"></div>
+    <motion.div
+      initial={{ opacity: 0, y: 20 }}
+      animate={{ opacity: 1, y: 0 }}
+      transition={{ delay: 0.5 }}
+      className="mt-12 text-muted-foreground"
+    >
+      Press Space to begin
+    </motion.div>
+  </motion.div>
+);
 
 export const WelcomeSlide = () => (
   <motion.div

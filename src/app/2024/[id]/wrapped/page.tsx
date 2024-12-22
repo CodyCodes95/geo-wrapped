@@ -1,6 +1,7 @@
 import { api } from "~/trpc/server";
 import Wrapped from "./components/Wrapped";
 import { notFound } from "next/navigation";
+import { ProcessingSlide } from "./components/Slides";
 
 export type WrappedStats = {
   totalStats: {
@@ -92,6 +93,10 @@ export default async function Page({
 
   if (!player) {
     notFound();
+  }
+
+  if (!player.processed) {
+    return <ProcessingSlide />;
   }
 
   const strongestCountries = await api.wrapped.strongestCountries({
