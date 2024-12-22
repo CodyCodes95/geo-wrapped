@@ -16,7 +16,7 @@ const Navigation = () => {
           <MonthSelector />
           <div className="flex items-center gap-4">
             {/* <SearchBar onSearch={onSearch} /> */}
-            <DarkModeToggle />
+            {/* <DarkModeToggle /> */}
           </div>
         </div>
       </div>
