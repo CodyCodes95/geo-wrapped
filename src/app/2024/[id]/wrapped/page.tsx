@@ -24,7 +24,7 @@ export type WrappedStats = {
     averageDistance: number;
     timesYouWereMultiMerchented: number;
     timesYouWereTheMultiMerchent: number;
-  }
+  };
   topGenre: {
     name: string;
     hours: number;
@@ -103,7 +103,7 @@ export default async function Page({
   const bestGames = await api.wrapped.bestGames({ playerId: id });
   const scoreStats = await api.wrapped.scoreStats({ playerId: id });
 
-  const stats: WrappedStats = {
+  const stats = {
     totalStats,
     bestGames,
     topMap,
@@ -127,6 +127,6 @@ export default async function Page({
       imageUrl: "https://source.unsplash.com/featured/400x400?album",
     },
     scoreStats,
-  };
+  } as unknown as WrappedStats;
   return <Wrapped stats={stats} />;
 }

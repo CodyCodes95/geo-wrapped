@@ -320,4 +320,19 @@ export const wrappedRouter = createTRPCRouter({
         topGuesses,
       };
     }),
+  competitiveStats: publicProcedure
+    .input(z.object({ playerId: z.string() }))
+    .query(async ({ input, ctx }) => {
+      const { playerId } = input;
+      const stats = await ctx.db
+        .select({
+          gamesPlayed: count(games.gameId),
+        })
+        .from(games)
+        .where(eq(games.playerId, playerId));
+
+      return {
+        gamesPlayed: Number(stats[0]?.gamesPlayed ?? 0),
+      };
+    }),
 });
