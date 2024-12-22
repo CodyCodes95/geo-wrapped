@@ -134,6 +134,10 @@ export const gameRouter = createTRPCRouter({
       const query = await ctx.db
         .select({
           gameId: games.gameId,
+          mapName: games.mapName,
+          type: games.type,
+          mode: games.mode,
+          gameTimeStarted: games.gameTimeStarted,
           roundId: rounds.roundId,
           answerId: answers.answerId,
           guessId: guesses.guessId,

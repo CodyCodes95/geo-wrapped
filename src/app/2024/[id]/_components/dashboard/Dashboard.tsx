@@ -4,6 +4,9 @@ import { SummaryCards } from "./SummaryCards";
 import { Card, CardContent, CardHeader, CardTitle } from "~/components/ui/card";
 import Map from "../map/Map";
 import { useRainboltMode } from "./_hooks/useRainboltMode";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "~/components/ui/tabs";
+import { GameTable } from "../tables/GameTable";
+import { RoundTable } from "../tables/RoundTable";
 
 const Dashboard = () => {
   const { RainboltMode } = useRainboltMode();
@@ -22,27 +25,19 @@ const Dashboard = () => {
           <Map />
         </CardContent>
       </Card>
-
-      {/* Detailed Stats Tabs */}
-      {/* <Tabs defaultValue="overview" className="space-y-4">
+      <Tabs defaultValue="games" className="space-y-4">
         <TabsList>
-          <TabsTrigger value="overview">Overview</TabsTrigger>
-          <TabsTrigger value="maps">Maps</TabsTrigger>
-          <TabsTrigger value="achievements">Achievements</TabsTrigger>
-          <TabsTrigger value="history">History</TabsTrigger>
+          <TabsTrigger value="games">Games</TabsTrigger>
+          <TabsTrigger value="rounds">Rounds</TabsTrigger>
         </TabsList>
 
-        <TabsContent value="overview" className="space-y-4">
-          <Card>
-            <CardHeader>
-              <CardTitle>Your guesses</CardTitle>
-            </CardHeader>
-            <CardContent>
-              <Map />
-            </CardContent>
-          </Card>
+        <TabsContent value="games" className="">
+          <GameTable />
         </TabsContent>
-      </Tabs> */}
+        <TabsContent value="games" className="">
+          <RoundTable />
+        </TabsContent>
+      </Tabs>
     </>
   );
 };
