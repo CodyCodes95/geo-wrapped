@@ -2,7 +2,6 @@
 import React from "react";
 import { APIProvider, Map as GoogleMap } from "@vis.gl/react-google-maps";
 import { env } from "~/env";
-
 import Markers from "./Markers";
 
 const Map = () => {
