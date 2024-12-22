@@ -16,6 +16,15 @@ export type WrappedStats = {
     mapName: string;
     summaryId: string;
   }[];
+  competitiveStats: {
+    gamesPlayed: number;
+    averageScore: number;
+    flawlessVictories: number;
+    averageGuessTime: number;
+    averageDistance: number;
+    timesYouWereMultiMerchented: number;
+    timesYouWereTheMultiMerchent: number;
+  }
   topGenre: {
     name: string;
     hours: number;
