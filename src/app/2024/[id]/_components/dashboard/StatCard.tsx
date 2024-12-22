@@ -18,7 +18,7 @@ export const SkeletonCell = ({ className }: { className: string }) => {
   return (
     <div
       className={cn(
-        "h-6 w-full animate-pulse rounded-md bg-primary-foreground",
+        "h-6 w-full animate-pulse rounded-lg bg-primary-foreground",
         className,
       )}
     />

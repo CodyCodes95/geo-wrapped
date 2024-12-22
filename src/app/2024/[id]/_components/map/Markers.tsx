@@ -10,8 +10,10 @@ import {
 } from "@vis.gl/react-google-maps";
 import { Button } from "~/components/ui/button";
 import { type RoundAnswer, useMapStore } from "~/store/mapStore";
-import { type answers } from "~/server/db/schema";
+import { useMapStateStore } from "~/store/clusterStore";
+import { ClusterMarker } from "./ClusterMarker";
 import { buildStreetViewUrl } from "~/utils/googleMaps";
+import { keepPreviousData } from "@tanstack/react-query";
 
 const Markers = () => {
   const playerId = usePlayerId()!;
@@ -20,10 +22,21 @@ const Markers = () => {
   const mapsLib = useMapsLibrary("maps");
   const { selectedRounds, clearSelectedRounds, setSelectedRounds } =
     useMapStore();
+  const { bounds, zoom } = useMapStateStore();
   const { data: player } = api.players.getPlayer.useQuery({ id: playerId });
-  const { data: rounds } = api.games.getAllWithResults.useQuery(
-    { playerId: playerId, selectedMonth },
-    { enabled: !!playerId },
+
+  // Get clustered markers from server
+  const { data: clusters } = api.games.getClusteredMarkers.useQuery(
+    {
+      playerId,
+      selectedMonth,
+      bounds: bounds!,
+      zoom,
+    },
+    {
+      enabled: !!bounds && !!playerId,
+      placeholderData: keepPreviousData,
+    },
   );
 
   const polyLines = React.useMemo(() => {
@@ -104,30 +117,44 @@ const Markers = () => {
 
   return (
     <>
-      {rounds?.map((round) => (
-        <AdvancedMarker
-          key={round.roundId}
-          position={round.guess}
-          anchorPoint={["50%", "50%"]}
-          onClick={() => {
-            setSelectedRounds([
-              {
-                id: round.roundId,
-                guess: {
-                  lat: round.guess.lat,
-                  lng: round.guess.lng,
+      {clusters?.map((cluster) => {
+        const [lng, lat] = cluster.geometry.coordinates;
+        const { cluster: isCluster, point_count: pointCount } =
+          cluster.properties;
+
+        if (isCluster) {
+          return (
+            <ClusterMarker
+              key={`cluster-${cluster.id}`}
+              position={{ lat: lat!, lng: lng! }}
+              count={pointCount}
+            />
+          );
+        }
+
+        const { roundId, guess, answer } = cluster.properties;
+        return (
+          <AdvancedMarker
+            key={roundId}
+            position={{ lat: lat!, lng: lng! }}
+            anchorPoint={["50%", "50%"]}
+            onClick={() => {
+              setSelectedRounds([
+                {
+                  id: roundId,
+                  guess,
+                  answer,
                 },
-                answer: round.answer,
-              },
-            ]);
-          }}
-        >
-          <img
-            className="h-8 w-8 rounded-full border-2 border-white"
-            src={`https://www.geoguessr.com/images/resize:auto:96:96/gravity:ce/plain/${player?.avatarUrl}`}
-          />
-        </AdvancedMarker>
-      ))}
+              ]);
+            }}
+          >
+            <img
+              className="h-8 w-8 rounded-full border-2 border-white"
+              src={`https://www.geoguessr.com/images/resize:auto:96:96/gravity:ce/plain/${player?.avatarUrl}`}
+            />
+          </AdvancedMarker>
+        );
+      })}
     </>
   );
 };

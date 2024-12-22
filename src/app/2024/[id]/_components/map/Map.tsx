@@ -3,8 +3,29 @@ import React from "react";
 import { APIProvider, Map as GoogleMap } from "@vis.gl/react-google-maps";
 import { env } from "~/env";
 import Markers from "./Markers";
+import { useMapStateStore } from "~/store/clusterStore";
 
 const Map = () => {
+  const updateBoundsAndZoom = (map: google.maps.Map) => {
+    const bounds = map.getBounds();
+    const zoom = map.getZoom();
+    if (bounds && zoom) {
+      useMapStateStore.setState({
+        bounds: {
+          ne: {
+            lat: bounds.getNorthEast().lat(),
+            lng: bounds.getNorthEast().lng(),
+          },
+          sw: {
+            lat: bounds.getSouthWest().lat(),
+            lng: bounds.getSouthWest().lng(),
+          },
+        },
+        zoom,
+      });
+    }
+  };
+
   return (
     <APIProvider apiKey={env.NEXT_PUBLIC_GOOGLE_API_KEY}>
       <GoogleMap
@@ -16,6 +37,9 @@ const Map = () => {
         minZoom={2}
         gestureHandling={"greedy"}
         disableDefaultUI={true}
+        onDragend={(e) => updateBoundsAndZoom(e.map)}
+        // onBoundsChanged={(e) => updateBoundsAndZoom(e.map)}
+        // onZoomChanged={(e) => updateBoundsAndZoom(e.map)}
       >
         <Markers />
       </GoogleMap>
