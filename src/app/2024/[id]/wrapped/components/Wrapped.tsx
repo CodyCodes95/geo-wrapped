@@ -53,57 +53,14 @@ export type YearStats = {
   };
 };
 
-export const yearStats: YearStats = {
-  topGenre: {
-    name: "Electronic",
-    hours: 1284,
-    topArtists: ["Daft Punk", "Deadmau5", "The Chemical Brothers"],
-  },
-  listeningClock: {
-    peakHour: "11 PM",
-    timeRange: "11 PM - 2 AM",
-    type: "Night Owl 🦉",
-  },
-  strongestCountries: [
-    {
-      country: "au",
-      correctGuesses: 10,
-      totalGuesses: 100,
-    },
-    {
-      country: "au",
-      correctGuesses: 10,
-      totalGuesses: 100,
-    },
-    {
-      country: "au",
-      correctGuesses: 1,
-      totalGuesses: 100,
-    },
-    {
-      country: "us",
-      correctGuesses: 2,
-      totalGuesses: 100,
-    },
-  ],
-  weakestCountries: [],
-  topSong: {
-    name: "Around the World",
-    artist: "Daft Punk",
-    playCount: 247,
-    minutes: 823,
-    imageUrl: "https://source.unsplash.com/featured/400x400?album",
-  },
-};
-
 const slides = [
   WelcomeSlide,
   RecapSlide,
   ScoreSlide,
   StrongestCountries,
   WeakestCountries,
-  TopSongSlide,
-  SummarySlide,
+  // TopSongSlide,
+  // SummarySlide,
 ];
 
 const Wrapped = ({ stats }: { stats: WrappedStats }) => {
