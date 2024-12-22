@@ -34,7 +34,7 @@ const Dashboard = () => {
         <TabsContent value="games" className="">
           <GameTable />
         </TabsContent>
-        <TabsContent value="games" className="">
+        <TabsContent value="rounds" className="">
           <RoundTable />
         </TabsContent>
       </Tabs>
