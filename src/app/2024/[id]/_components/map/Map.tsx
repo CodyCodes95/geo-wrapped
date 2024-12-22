@@ -13,6 +13,7 @@ const Map = () => {
         style={{ width: "100%", height: "60vh" }}
         defaultCenter={{ lat: 22.54992, lng: 0 }}
         defaultZoom={2}
+        minZoom={2}
         gestureHandling={"greedy"}
         disableDefaultUI={true}
       >

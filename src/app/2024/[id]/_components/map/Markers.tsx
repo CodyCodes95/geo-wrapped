@@ -9,7 +9,9 @@ import {
   useMapsLibrary,
 } from "@vis.gl/react-google-maps";
 import { Button } from "~/components/ui/button";
-import { useMapStore } from "~/store/mapStore";
+import { type RoundAnswer, useMapStore } from "~/store/mapStore";
+import { type answers } from "~/server/db/schema";
+import { buildStreetViewUrl } from "~/utils/googleMaps";
 
 const Markers = () => {
   const playerId = usePlayerId()!;
@@ -53,6 +55,20 @@ const Markers = () => {
     };
   }, [map, polyLines, selectedRounds]);
 
+  const openGooglePano = (answer: RoundAnswer) => {
+    window.open(
+      buildStreetViewUrl({
+        latitude: answer.lat,
+        longitude: answer.lng,
+        heading: answer.heading,
+        pitch: answer.pitch,
+        zoom: answer.zoom,
+        panoramaId: answer.googlePanoId,
+      }),
+      "_blank",
+    );
+  };
+
   if (selectedRounds.length) {
     return (
       <>
@@ -71,6 +87,7 @@ const Markers = () => {
               />
             </AdvancedMarker>
             <AdvancedMarker
+              onClick={() => openGooglePano(round.answer)}
               position={round.answer}
               anchorPoint={["50%", "50%"]}
             >
@@ -100,10 +117,7 @@ const Markers = () => {
                   lat: round.guess.lat,
                   lng: round.guess.lng,
                 },
-                answer: {
-                  lat: round.answer.lat,
-                  lng: round.answer.lng,
-                },
+                answer: round.answer,
               },
             ]);
           }}

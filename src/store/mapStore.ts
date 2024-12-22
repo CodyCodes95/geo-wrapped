@@ -1,15 +1,21 @@
 import { create } from "zustand";
 
+export type RoundAnswer = {
+    lat: number;
+    lng: number;
+    googlePanoId: string;
+    pitch: number;
+    heading: number;
+    zoom: number;
+  };
+
 export type SelectedRound = {
   id: string;
   guess: {
     lat: number;
     lng: number;
   };
-  answer: {
-    lat: number;
-    lng: number;
-  };
+  answer: RoundAnswer;
 };
 
 type MapStore = {
