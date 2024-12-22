@@ -13,7 +13,7 @@ const Map = () => {
         defaultCenter={{ lat: 22.54992, lng: 0 }}
         defaultZoom={2}
         gestureHandling={"greedy"}
-        // disableDefaultUI={true}
+        disableDefaultUI={true}
       >
         <Markers />
       </GoogleMap>
