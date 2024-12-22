@@ -38,8 +38,7 @@ const Map = () => {
         gestureHandling={"greedy"}
         disableDefaultUI={true}
         onDragend={(e) => updateBoundsAndZoom(e.map)}
-        // onBoundsChanged={(e) => updateBoundsAndZoom(e.map)}
-        // onZoomChanged={(e) => updateBoundsAndZoom(e.map)}
+        onZoomChanged={(e) => updateBoundsAndZoom(e.map)}
       >
         <Markers />
       </GoogleMap>

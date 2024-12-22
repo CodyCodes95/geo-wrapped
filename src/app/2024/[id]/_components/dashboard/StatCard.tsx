@@ -2,7 +2,6 @@ import { InfoIcon, type LucideIcon } from "lucide-react";
 import { Button } from "~/components/ui/button";
 import { Card } from "~/components/ui/card";
 import { useFlip } from "./_hooks/useFlip";
-import { getCountryFlagEmoji } from "~/utils";
 import { cn } from "~/lib/utils";
 
 type StatCardProps = {
