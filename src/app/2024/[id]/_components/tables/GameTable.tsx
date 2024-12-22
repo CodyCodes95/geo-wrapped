@@ -61,7 +61,7 @@ export const GameTable = () => {
     );
   };
 
-  const isDuelGame = (game: (typeof games)[0]) => game.mode === "Duel";
+  const isDuelGame = (game: (typeof games)[0]) => game.type === "Duel";
 
   const getGameResult = (rounds: typeof games) => {
     if (!isDuelGame(rounds[0]!)) return null;
