@@ -306,7 +306,9 @@ export const CompteitivePerformanceSlide = ({ stats }: Props) => {
           <span className="text-5xl font-bold text-yellow-500">
             {stats.competitiveStats.flawlessVictories}
           </span>
-          <span className="text-xl text-muted-foreground">Flawless Victories</span>
+          <span className="text-xl text-muted-foreground">
+            Flawless Victories
+          </span>
           <span className="text-sm text-muted-foreground">
             Perfect 6000 health wins
           </span>
@@ -321,9 +323,7 @@ export const CompteitivePerformanceSlide = ({ stats }: Props) => {
           <span className="text-5xl font-bold text-primary">
             {stats.competitiveStats.avgScore}
           </span>
-          <span className="text-xl text-muted-foreground">
-            Average Score
-          </span>
+          <span className="text-xl text-muted-foreground">Average Score</span>
           <span className="text-sm text-muted-foreground">
             Points per guess
           </span>
@@ -375,7 +375,7 @@ export const CompteitivePerformanceSlide = ({ stats }: Props) => {
 
 export const SummarySlide = ({ stats }: Props) => (
   <div className="flex min-h-screen flex-col items-center justify-center bg-[#191414] p-8">
-    <h1 className="mb-8 bg-gradient-to-r from-[#1DB954] to-[#169c46] bg-clip-text text-4xl font-bold text-transparent">
+    <h1 className="mb-8 text-4xl font-bold text-primary">
       Your Year in Review
     </h1>
 
@@ -409,7 +409,6 @@ export const SummarySlide = ({ stats }: Props) => (
       {/* <p className="text-2xl font-bold text-white">{stats.moods[0].name}</p> */}
       {/* <p className="text-gray-400">{stats.moods[0].percentage}% of tracks</p> */}
       {/* </div> */}
-      <p>Umm working on this one</p>
     </motion.div>
     <Link href=".">
       <motion.button
