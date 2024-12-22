@@ -353,18 +353,17 @@ export const CompteitivePerformanceSlide = ({ stats }: Props) => {
                   {duel.mapName}
                 </span>
               </div>
-              <div className="flex items-center gap-2">
-                <span className="text-sm text-muted-foreground">
-                  {duel.totalPoints?.toLocaleString()} points
-                </span>
-                <Link
-                  href={`https://www.geoguessr.com${duel.gameUrl}`}
-                  target="_blank"
-                  className="text-primary hover:text-primary/80"
-                >
+              <Link
+                className="hover:text-primary"
+                href={`https://www.geoguessr.com${duel.gameUrl}`}
+              >
+                <div className="flex items-center gap-2">
+                  <span className="text-sm text-muted-foreground">
+                    View game
+                  </span>
                   <ExternalLinkIcon className="h-5 w-5" />
-                </Link>
-              </div>
+                </div>
+              </Link>
             </div>
           ))}
         </div>
