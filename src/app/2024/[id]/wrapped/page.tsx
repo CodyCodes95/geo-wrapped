@@ -19,12 +19,21 @@ export type WrappedStats = {
   }[];
   competitiveStats: {
     gamesPlayed: number;
-    averageScore: number;
+    avgScore: number;
     flawlessVictories: number;
     averageGuessTime: number;
     averageDistance: number;
     timesYouWereMultiMerchented: number;
     timesYouWereTheMultiMerchent: number;
+    totalDuels: number;
+    totalDuelsWon: number;
+    winPercentage: number;
+    toughestWonDuels: {
+      mapName: string;
+      roundCount: number;
+      totalPoints: number;
+      gameUrl: string;
+    }[];
   };
   topGenre: {
     name: string;
@@ -99,14 +108,37 @@ export default async function Page({
     return <ProcessingSlide />;
   }
 
-  const strongestCountries = await api.wrapped.strongestCountries({
+  const strongestCountriesQuery = await api.wrapped.strongestCountries({
     playerId: id,
   });
-  const weakestCountries = await api.wrapped.weakestCountries({ playerId: id });
-  const totalStats = await api.wrapped.totalGamesSummary({ playerId: id });
-  const topMap = await api.wrapped.topMap({ playerId: id });
-  const bestGames = await api.wrapped.bestGames({ playerId: id });
-  const scoreStats = await api.wrapped.scoreStats({ playerId: id });
+  const weakestCountriesQuery = await api.wrapped.weakestCountries({
+    playerId: id,
+  });
+  const totalStatsQuery = await api.wrapped.totalGamesSummary({ playerId: id });
+  const topMapuery = await api.wrapped.topMap({ playerId: id });
+  const bestGamesQuery = await api.wrapped.bestGames({ playerId: id });
+  const scoreStatsQuery = await api.wrapped.scoreStats({ playerId: id });
+  const competitiveStatsQuery = await api.wrapped.competitiveStats({
+    playerId: id,
+  });
+
+  const [
+    totalStats,
+    bestGames,
+    topMap,
+    strongestCountries,
+    weakestCountries,
+    scoreStats,
+    competitiveStats,
+  ] = await Promise.all([
+    totalStatsQuery,
+    bestGamesQuery,
+    topMapuery,
+    strongestCountriesQuery,
+    weakestCountriesQuery,
+    scoreStatsQuery,
+    competitiveStatsQuery,
+  ]);
 
   const stats = {
     totalStats,
@@ -132,6 +164,7 @@ export default async function Page({
       imageUrl: "https://source.unsplash.com/featured/400x400?album",
     },
     scoreStats,
+    competitiveStats,
   } as unknown as WrappedStats;
   return <Wrapped stats={stats} />;
 }

@@ -39,6 +39,8 @@ favourite gamemode
 
 Comp performance:
 
+total duels played
+toughest duels you won (longest round length with victory)
 x times multi merchented
 x times you were a multi merchent
 flawless victories

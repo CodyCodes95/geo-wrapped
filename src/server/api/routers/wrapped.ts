@@ -5,6 +5,7 @@ import {
   count,
   desc,
   eq,
+  gt,
   gte,
   isNotNull,
   not,
@@ -320,19 +321,109 @@ export const wrappedRouter = createTRPCRouter({
         topGuesses,
       };
     }),
+  // competitiveStats: publicProcedure
+  //   .input(z.object({ playerId: z.string() }))
+  //   .query(async ({ input, ctx }) => {
+  //     const { playerId } = input;
+  //     const stats = await ctx.db
+  //       .select({
+  //         gamesPlayed: count(games.gameId),
+  //         avgScore: avg(guesses.points),
+  //         // count of games where the last guess healthAfter is greater than 0
+  //         flawLessVictories: count(
+  //       })
+  //       .from(games)
+  //       .where(and(eq(games.playerId, playerId), eq(games.type, "Duel")))
+  //     .innerJoin(guesses, eq(guesses.roundId, rounds.roundId))
+  //     .innerJoin(rounds, eq(rounds.gameId, games.gameId))
+
+  //     return {
+  //       gamesPlayed: Number(stats[0]?.gamesPlayed ?? 0),
+  //     };
+  //   }),
   competitiveStats: publicProcedure
     .input(z.object({ playerId: z.string() }))
     .query(async ({ input, ctx }) => {
       const { playerId } = input;
-      const stats = await ctx.db
+
+      // Create a subquery for last round health
+      const lastRoundHealth = ctx.db.$with("last_round_health").as(
+        ctx.db
+          .select({
+            gameId: games.gameId,
+            healthAfter: guesses.healthAfter,
+          })
+          .from(games)
+          .innerJoin(rounds, eq(rounds.gameId, games.gameId))
+          .innerJoin(guesses, eq(guesses.roundId, rounds.roundId))
+          .where(
+            and(
+              eq(games.playerId, playerId),
+              eq(games.type, "Duel"),
+              sql`${rounds.roundNo} = (
+              select max(round_no)
+              from ${rounds} r2
+              where r2.game_id = ${games.gameId}
+            )`,
+            ),
+          ),
+      );
+
+      // Main query using the WITH clause
+      const duelStats = await ctx.db
+        .with(lastRoundHealth)
         .select({
-          gamesPlayed: count(games.gameId),
+          totalDuels: count(games.gameId),
+          totalDuelsWon: sql<number>`count(case when ${lastRoundHealth.healthAfter} > 0 then 1 end)`,
+          flawlessVictories: sql<number>`count(case when ${lastRoundHealth.healthAfter} = 6000 then 1 end)`,
+          avgScore: avg(guesses.points),
         })
         .from(games)
-        .where(eq(games.playerId, playerId));
+        .innerJoin(lastRoundHealth, eq(lastRoundHealth.gameId, games.gameId))
+        .innerJoin(rounds, eq(rounds.gameId, games.gameId))
+        .innerJoin(guesses, eq(guesses.roundId, rounds.roundId))
+        .where(and(eq(games.playerId, playerId), eq(games.type, "Duel")));
+
+      // Top 3 toughest won duels
+      const toughestWonDuels = await ctx.db
+        .select({
+          gameId: games.gameId,
+          mapName: games.mapName,
+          roundCount: count(rounds.roundId),
+          totalPoints: games.totalPoints,
+          healthAfter: guesses.healthAfter,
+        })
+        .from(games)
+        .innerJoin(rounds, eq(rounds.gameId, games.gameId))
+        .innerJoin(guesses, eq(guesses.roundId, rounds.roundId))
+        .where(
+          and(
+            eq(games.playerId, playerId),
+            eq(games.type, "Duel"),
+            gt(guesses.healthAfter, 0),
+          ),
+        )
+        .groupBy(games.gameId)
+        .orderBy(desc(count(rounds.roundId)), desc(games.totalPoints))
+        .limit(3);
+
+      const stats = duelStats[0];
+      if (!stats) throw new Error("No duel stats found");
 
       return {
-        gamesPlayed: Number(stats[0]?.gamesPlayed ?? 0),
+        totalDuels: Number(stats.totalDuels),
+        totalDuelsWon: Number(stats.totalDuelsWon),
+        winPercentage: Math.round(
+          (Number(stats.totalDuelsWon) / Number(stats.totalDuels)) * 100,
+        ),
+        flawlessVictories: Number(stats.flawlessVictories),
+        avgScore: Math.round(Number(stats.avgScore)),
+        toughestWonDuels: toughestWonDuels.map((duel) => ({
+          mapName: duel.mapName,
+          roundCount: Number(duel.roundCount),
+          totalPoints: Number(duel.totalPoints),
+          gameUrl: `/duels/${duel.gameId}/summary`,
+        })),
       };
     }),
 });

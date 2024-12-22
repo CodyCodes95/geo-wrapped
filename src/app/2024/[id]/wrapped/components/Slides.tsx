@@ -260,8 +260,115 @@ export const ScoreSlide = ({ stats }: Props) => {
 
 export const CompteitivePerformanceSlide = ({ stats }: Props) => {
   return (
-    <div>
-      <p>working on this slide</p>
+    <div className="flex min-h-screen flex-col items-center justify-center gap-8 bg-[#191414] p-4">
+      <motion.h1
+        initial={{ opacity: 0, y: -20 }}
+        animate={{ opacity: 1, y: 0 }}
+        className="text-4xl font-bold text-primary"
+      >
+        Your Competitive Performance
+      </motion.h1>
+
+      <div className="grid grid-cols-1 gap-8 md:grid-cols-2 lg:grid-cols-3">
+        <motion.div
+          initial={{ scale: 0, opacity: 0 }}
+          animate={{ scale: 1, opacity: 1 }}
+          transition={{ delay: 0.2 }}
+          className="flex flex-col items-center gap-2 rounded-lg border border-primary/20 p-6 text-center"
+        >
+          <span className="text-5xl font-bold text-primary">
+            {stats.competitiveStats.totalDuels}
+          </span>
+          <span className="text-xl text-muted-foreground">Total Duels</span>
+        </motion.div>
+
+        <motion.div
+          initial={{ scale: 0, opacity: 0 }}
+          animate={{ scale: 1, opacity: 1 }}
+          transition={{ delay: 0.4 }}
+          className="flex flex-col items-center gap-2 rounded-lg border border-primary/20 p-6 text-center"
+        >
+          <span className="text-5xl font-bold text-green-500">
+            {stats.competitiveStats.totalDuelsWon}
+          </span>
+          <span className="text-xl text-muted-foreground">Duels Won</span>
+          <span className="text-sm text-muted-foreground">
+            {stats.competitiveStats.winPercentage}% win rate
+          </span>
+        </motion.div>
+
+        <motion.div
+          initial={{ scale: 0, opacity: 0 }}
+          animate={{ scale: 1, opacity: 1 }}
+          transition={{ delay: 0.6 }}
+          className="flex flex-col items-center gap-2 rounded-lg border border-primary/20 p-6 text-center"
+        >
+          <span className="text-5xl font-bold text-yellow-500">
+            {stats.competitiveStats.flawlessVictories}
+          </span>
+          <span className="text-xl text-muted-foreground">Flawless Victories</span>
+          <span className="text-sm text-muted-foreground">
+            Perfect 6000 health wins
+          </span>
+        </motion.div>
+
+        <motion.div
+          initial={{ scale: 0, opacity: 0 }}
+          animate={{ scale: 1, opacity: 1 }}
+          transition={{ delay: 0.8 }}
+          className="flex flex-col items-center gap-2 rounded-lg border border-primary/20 p-6 text-center"
+        >
+          <span className="text-5xl font-bold text-primary">
+            {stats.competitiveStats.avgScore}
+          </span>
+          <span className="text-xl text-muted-foreground">
+            Average Score
+          </span>
+          <span className="text-sm text-muted-foreground">
+            Points per guess
+          </span>
+        </motion.div>
+      </div>
+
+      <motion.div
+        initial={{ y: 50, opacity: 0 }}
+        animate={{ y: 0, opacity: 1 }}
+        transition={{ delay: 1.2 }}
+        className="mt-8 w-full max-w-2xl"
+      >
+        <h2 className="mb-4 text-center text-2xl font-bold text-primary">
+          Toughest Duels Won
+        </h2>
+        <div className="grid gap-4">
+          {stats.competitiveStats.toughestWonDuels.map((duel, index) => (
+            <div
+              key={index}
+              className="flex items-center justify-between rounded-lg border border-primary/20 p-4"
+            >
+              <div className="flex flex-col gap-1">
+                <span className="text-xl font-bold text-primary">
+                  {duel.roundCount} rounds
+                </span>
+                <span className="text-sm text-muted-foreground">
+                  {duel.mapName}
+                </span>
+              </div>
+              <div className="flex items-center gap-2">
+                <span className="text-sm text-muted-foreground">
+                  {duel.totalPoints?.toLocaleString()} points
+                </span>
+                <Link
+                  href={`https://www.geoguessr.com${duel.gameUrl}`}
+                  target="_blank"
+                  className="text-primary hover:text-primary/80"
+                >
+                  <ExternalLinkIcon className="h-5 w-5" />
+                </Link>
+              </div>
+            </div>
+          ))}
+        </div>
+      </motion.div>
     </div>
   );
 };
