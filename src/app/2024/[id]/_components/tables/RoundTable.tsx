@@ -71,6 +71,7 @@ export const RoundTable = () => {
   const filteredAndSortedRounds = rounds
     .filter((round) =>
       Object.values(round).some((value) =>
+        // eslint-disable-next-line @typescript-eslint/no-base-to-string
         String(value).toLowerCase().includes(search.toLowerCase())
       )
     )

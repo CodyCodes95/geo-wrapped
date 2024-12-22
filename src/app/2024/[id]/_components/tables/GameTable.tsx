@@ -73,6 +73,7 @@ export const GameTable = () => {
     .filter(([_, rounds]) => {
       const game = rounds[0];
       return Object.values(game!).some((value) =>
+        // eslint-disable-next-line @typescript-eslint/no-base-to-string
         String(value).toLowerCase().includes(search.toLowerCase()),
       );
     })
@@ -95,10 +96,18 @@ export const GameTable = () => {
             modifier
           );
         default:
-          return (
-            String(gameA![sortField]).localeCompare(String(gameB![sortField])) *
-            modifier
-          );
+          if (
+            sortField === "mapName" ||
+            sortField === "type" ||
+            sortField === "mode"
+          ) {
+            return (
+              String(gameA![sortField]).localeCompare(
+                String(gameB![sortField]),
+              ) * modifier
+            );
+          }
+          return 0;
       }
     });
 
