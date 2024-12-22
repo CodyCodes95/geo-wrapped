@@ -61,6 +61,15 @@ export type WrappedStats = {
     avgTime: number;
     avgDistance: number;
     timedOutGuesses: number;
+    topGuesses: {
+      points: number;
+      distanceInMeters: number;
+      mapName: string;
+      gameUrl: string;
+      gameMode: string;
+      gameType: string;
+      timeInSeconds: number;
+    }[];
   };
 };
 

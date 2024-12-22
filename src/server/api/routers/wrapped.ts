@@ -289,6 +289,27 @@ export const wrappedRouter = createTRPCRouter({
         .innerJoin(rounds, eq(rounds.roundId, guesses.roundId))
         .innerJoin(games, eq(games.gameId, rounds.gameId))
         .where(eq(games.playerId, playerId));
+
+      const topGuesses = await ctx.db
+        .select({
+          points: guesses.points,
+          distanceInMeters: guesses.distanceInMeters,
+          mapName: games.mapName,
+          gameMode: games.mode,
+          gameType: games.type,
+          gameUrl: sql<string>`CASE 
+            WHEN ${games.type} = 'Standard' THEN '/results/' || ${games.gameId}
+            ELSE '/duels/' || ${games.gameId} || '/summary'
+          END`,
+          timeInSeconds: guesses.timeInSeconds,
+        })
+        .from(guesses)
+        .innerJoin(rounds, eq(rounds.roundId, guesses.roundId))
+        .innerJoin(games, eq(games.gameId, rounds.gameId))
+        .where(and(eq(games.playerId, playerId), eq(guesses.timedOut, false)))
+        .orderBy(desc(guesses.points), asc(guesses.distanceInMeters))
+        .limit(3);
+
       return {
         timedOutGuesses: Number(stats[0]?.timedOutGuesses ?? 0),
         perfectScores: Number(stats[0]?.perfectScores ?? 0),
@@ -296,6 +317,7 @@ export const wrappedRouter = createTRPCRouter({
         avgScore: Number(stats[0]?.avgScore ?? 0),
         avgTime: Number(stats[0]?.avgTime ?? 0),
         avgDistance: Number(stats[0]?.avgDistance ?? 0) / 1000, // Convert to km
+        topGuesses,
       };
     }),
 });

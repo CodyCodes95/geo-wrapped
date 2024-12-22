@@ -182,6 +182,46 @@ export const ScoreSlide = ({ stats }: Props) => {
           <span className="text-sm text-muted-foreground">Kilometers off</span>
         </motion.div>
       </div>
+
+      <motion.div
+        initial={{ y: 50, opacity: 0 }}
+        animate={{ y: 0, opacity: 1 }}
+        transition={{ delay: 1.2 }}
+        className="mt-8 w-full max-w-2xl"
+      >
+        <h2 className="mb-4 text-center text-2xl font-bold text-primary">
+          Top Guesses
+        </h2>
+        <div className="grid gap-4">
+          {stats.scoreStats.topGuesses.map((guess, index) => (
+            <div
+              key={index}
+              className="flex items-center justify-between rounded-lg border border-primary/20 p-4"
+            >
+              <div className="flex flex-col gap-1">
+                <span className="text-xl font-bold text-primary">
+                  {guess.points} points
+                </span>
+                <span className="text-sm text-muted-foreground">
+                  {guess.mapName}
+                  {guess.gameType === "Duel" && " Duels"} - {guess.gameMode}
+                </span>
+              </div>
+              <div className="flex flex-col items-end gap-1 text-sm text-muted-foreground">
+                <span>{Math.round(guess.distanceInMeters)}m away</span>
+                <span>Guessed in {guess.timeInSeconds}s</span>
+                <Link
+                  href={`https://www.geoguessr.com${guess.gameUrl}`}
+                  target="_blank"
+                  className="text-primary hover:underline"
+                >
+                  View game
+                </Link>
+              </div>
+            </div>
+          ))}
+        </div>
+      </motion.div>
     </div>
   );
 };
