@@ -42,7 +42,7 @@ export const RecapSlide = ({ stats }: Props) => {
     <motion.div
       initial={{ opacity: 0 }}
       animate={{ opacity: 1 }}
-      className="flex min-h-screen flex-col items-center justify-center gap-4 bg-[#191414]"
+      className="flex min-h-screen flex-col items-center justify-center gap-4 bg-[#191414] p-4"
     >
       <h1 className="mb-8 bg-clip-text text-4xl font-bold">
         Total games played: {stats.totalStats.totalGamesPlayed}
@@ -71,21 +71,31 @@ export const RecapSlide = ({ stats }: Props) => {
         initial={{ y: 50, opacity: 0 }}
         animate={{ y: 0, opacity: 1 }}
         transition={{ delay: 0.6 }}
-        className="flex flex-col gap-2 text-center"
+        className="mt-8 w-full max-w-2xl"
       >
-        <div className="text-2xl">Top 3 games</div>
-        <div className="text-xl text-gray-400">
+        <h2 className="mb-4 text-center text-2xl font-bold text-primary">
+          Top Games
+        </h2>
+        <div className="grid gap-4">
           {stats.bestGames.map((game, index) => (
-            <div className="flex justify-between gap-4" key={index}>
-              <span>
-                {index + 1}. {game.mapName} - {game.gameMode} - {game.points}{" "}
-                points
-              </span>
+            <div
+              key={index}
+              className="flex items-center justify-between rounded-lg border border-primary/20 p-4"
+            >
+              <div className="flex flex-col gap-1">
+                <span className="text-xl font-bold text-primary">
+                  {game.points?.toLocaleString()} points
+                </span>
+                <span className="text-sm text-muted-foreground">
+                  {game.mapName} - {game.gameMode}
+                </span>
+              </div>
               <Link
-                target="_blank"
                 href={`https://www.geoguessr.com/results/${game.summaryId}`}
+                target="_blank"
+                className="text-primary hover:underline"
               >
-                <ExternalLinkIcon className="text-primary" />
+                View game
               </Link>
             </div>
           ))}
