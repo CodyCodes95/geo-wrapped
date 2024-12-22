@@ -1,5 +1,5 @@
 "use client";
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useMemo, useState } from "react";
 import { api } from "~/trpc/react";
 import { usePlayerId } from "../dashboard/_hooks/usePlayerId";
 import { useMonth } from "../_layout/MonthSelector";
@@ -8,6 +8,7 @@ import {
   useMap,
   useMapsLibrary,
 } from "@vis.gl/react-google-maps";
+import { Button } from "~/components/ui/button";
 
 type SelectedRound = {
   id: string;
@@ -36,29 +37,34 @@ const Markers = () => {
     { enabled: !!playerId },
   );
 
-  useEffect(() => {
-    if (!mapsLib) return;
-    if (!selectedRound) {
-      // remove the polyline
-      return;
-    }
+  const polyLine = new google.maps.Polyline({
+    strokeColor: "black",
+    strokeOpacity: 1.0,
+    strokeWeight: 2,
+  });
 
-    const polyline = new mapsLib.Polyline({
-      path: [
-        { lat: selectedRound.guess.lat, lng: selectedRound.guess.lng },
-        { lat: selectedRound.answer.lat, lng: selectedRound.answer.lng },
-      ],
-      strokeColor: "black",
-      strokeOpacity: 1.0,
-      strokeWeight: 1.5,
-    });
+  const clearRound = () => {
+    polyLine?.setMap(null);
+    polyLine?.setPath([]);
+    setSelectedRound(null);
+  };
 
-    polyline.setMap(map);
-  }, [selectedRound, mapsLib]);
+  const selectRound = (round: SelectedRound) => {
+    if (selectedRound) return;
+    polyLine.setPath([
+      { lat: round.guess.lat, lng: round.guess.lng },
+      { lat: round.answer.lat, lng: round.answer.lng },
+    ]);
+    polyLine?.setMap(map);
+    setSelectedRound(round);
+  };
 
   if (selectedRound) {
     return (
       <>
+        <Button onClick={clearRound} className="absolute -top-10 right-0">
+          Clear selected round
+        </Button>
         <AdvancedMarker
           anchorPoint={["50%", "50%"]}
           position={selectedRound.guess}
@@ -87,7 +93,7 @@ const Markers = () => {
         <AdvancedMarker
           anchorPoint={["50%", "50%"]}
           onClick={() => {
-            setSelectedRound({
+            selectRound({
               id: round.roundId,
               guess: {
                 lat: round.guess.lat,

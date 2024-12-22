@@ -8,6 +8,7 @@ const Map = () => {
   return (
     <APIProvider apiKey={env.NEXT_PUBLIC_GOOGLE_API_KEY}>
       <GoogleMap
+        clickableIcons={false}
         mapId={env.NEXT_PUBLIC_GOOGLE_MAP_ID}
         style={{ width: "100%", height: "60vh" }}
         defaultCenter={{ lat: 22.54992, lng: 0 }}
