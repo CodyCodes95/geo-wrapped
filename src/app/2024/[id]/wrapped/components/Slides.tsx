@@ -23,17 +23,20 @@ export const ProcessingSlide = () => (
     animate={{ opacity: 1 }}
     className="flex min-h-screen flex-col items-center justify-center bg-[#191414] text-center"
   >
-    <h1 className="bg-gradient-to-r from-primary to-[#15cf4b] bg-clip-text text-6xl font-bold text-transparent">
-      We are processing your data. Come back soon to see the results!
+    <h1 className="text-5xl text-primary">
+      We are processing your data. Save this link and come back soon to see the
+      results!
     </h1>
-    <div className="mt-4 text-xl text-primary"></div>
     <motion.div
       initial={{ opacity: 0, y: 20 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ delay: 0.5 }}
       className="mt-12 text-muted-foreground"
     >
-      Press Space to begin
+      <p>
+        Processing your rounds can take a while. Estimation is 10 minutes per
+        500 games played.
+      </p>
     </motion.div>
   </motion.div>
 );
