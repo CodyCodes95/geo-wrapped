@@ -96,8 +96,8 @@ export const gameRouter = createTRPCRouter({
         .orderBy(desc(count(games.mode)));
 
       return {
-        standard: query.find((t) => t.mode === "Standard")?.count ?? 0,
-        noMove: query.find((t) => t.mode === "NoMove")?.count ?? 0,
+        standard: query.find((t) => t.mode === "Moving")?.count ?? 0,
+        noMove: query.find((t) => t.mode === "No Move")?.count ?? 0,
         nmpz: query.find((t) => t.mode === "NMPZ")?.count ?? 0,
       };
     }),
