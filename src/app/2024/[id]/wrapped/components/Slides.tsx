@@ -145,7 +145,7 @@ export const ScoreSlide = ({ stats }: Props) => {
           transition={{ delay: 0.2 }}
           className="flex flex-col items-center gap-2 rounded-lg border border-primary/20 p-6 text-center"
         >
-          <span className="text-5xl font-bold text-green-500">
+          <span className="text-5xl font-bold text-primary">
             {stats.scoreStats.perfectScores}
           </span>
           <span className="text-xl text-muted-foreground">{"5K's"}</span>
@@ -288,7 +288,7 @@ export const CompteitivePerformanceSlide = ({ stats }: Props) => {
           transition={{ delay: 0.4 }}
           className="flex flex-col items-center gap-2 rounded-lg border border-primary/20 p-6 text-center"
         >
-          <span className="text-5xl font-bold text-green-500">
+          <span className="text-5xl font-bold text-primary">
             {stats.competitiveStats.totalDuelsWon}
           </span>
           <span className="text-xl text-muted-foreground">Duels Won</span>
@@ -299,10 +299,10 @@ export const CompteitivePerformanceSlide = ({ stats }: Props) => {
         <motion.div
           initial={{ scale: 0, opacity: 0 }}
           animate={{ scale: 1, opacity: 1 }}
-          transition={{ delay: 0.4 }}
+          transition={{ delay: 0.6 }}
           className="flex flex-col items-center gap-2 rounded-lg border border-primary/20 p-6 text-center"
         >
-          <span className="text-5xl font-bold text-green-500">
+          <span className="text-5xl font-bold text-primary">
             {stats.competitiveStats.winPercentage}%
           </span>
           <span className="text-xl text-muted-foreground">Win rate</span>
@@ -311,7 +311,7 @@ export const CompteitivePerformanceSlide = ({ stats }: Props) => {
         <motion.div
           initial={{ scale: 0, opacity: 0 }}
           animate={{ scale: 1, opacity: 1 }}
-          transition={{ delay: 0.6 }}
+          transition={{ delay: 0.8 }}
           className="flex flex-col items-center gap-2 rounded-lg border border-primary/20 p-6 text-center"
         >
           <span className="text-5xl font-bold text-yellow-500">
@@ -325,7 +325,7 @@ export const CompteitivePerformanceSlide = ({ stats }: Props) => {
         <motion.div
           initial={{ scale: 0, opacity: 0 }}
           animate={{ scale: 1, opacity: 1 }}
-          transition={{ delay: 0.8 }}
+          transition={{ delay: 1.0 }}
           className="flex flex-col items-center gap-2 rounded-lg border border-primary/20 p-6 text-center"
         >
           <span className="text-5xl font-bold text-primary">
@@ -419,7 +419,7 @@ export const SummarySlide = ({ stats }: Props) => (
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ delay: 0.3 }}
-        className="rounded-full bg-green-400 px-8 py-4 font-bold text-black transition-colors hover:bg-green-500"
+        className="rounded-full bg-green-400 px-8 py-4 font-bold text-black transition-colors hover:bg-primary"
       >
         View Full Stats Dashboard
       </motion.button>

@@ -42,7 +42,7 @@ const ThailandRegionCard = () => {
   return (
     <StatCard
       icon={getCountryFlagEmoji("TH")}
-      iconColor="text-green-500"
+      iconColor="text-primary"
       title="Thailand Region Guesses (withim 100km)"
       value={guesses?.hundredKm?.length ?? 0}
       loading={isLoading}
@@ -90,7 +90,7 @@ export const TimedOutCard = () => {
   return (
     <StatCard
       icon={"😂🫵"}
-      iconColor="text-green-500"
+      iconColor="text-primary"
       title="Timed Out Guesses 💀"
       value={guesses?.[0]?.count ?? 0}
       loading={guessesLoading || roundsLoading}
@@ -182,7 +182,7 @@ export const GuessesInObamaCard = () => {
   return (
     <StatCard
       icon={getCountryFlagEmoji("JP")}
-      iconColor="text-green-500"
+      iconColor="text-primary"
       title="Guesses in Obama"
       value={guesses?.[0]?.count ?? 0}
       loading={isLoading}
@@ -329,7 +329,7 @@ export const AverageScoreCard = () => {
   return (
     <StatCard
       icon={TargetIcon}
-      iconColor="text-green-500"
+      iconColor="text-primary"
       title="Avg. Score"
       value={avgScore ?? 0}
       loading={avgLoading}

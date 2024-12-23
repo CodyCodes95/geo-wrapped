@@ -7,6 +7,7 @@ import {
   desc,
   eq,
   gt,
+  gte,
   isNotNull,
   not,
   sql,
@@ -158,10 +159,10 @@ export const wrappedRouter = createTRPCRouter({
         [
           ...Object.entries(countryCodes).map(
             ([code, name]) =>
-              sql`(${rounds.answerCountryCode} = ${code.toLowerCase()} AND LOWER(${games.mapName}) NOT LIKE ${`%${name.toLowerCase()}%`})`,
+              sql`(${rounds.answerCountryCode} = ${code.toLowerCase()} AND LOWER(${games.mapName}) NOT LIKE ${`%${name.toLowerCase()}%`} AND ${games.playerId} = ${playerId})`,
           ),
-          sql`(${rounds.answerCountryCode} = 'us' AND LOWER(${games.mapName}) NOT LIKE ${`%$us%`})`,
-          sql`(${rounds.answerCountryCode} = 'us' AND LOWER(${games.mapName}) NOT LIKE ${`%$u.s%`})`,
+          sql`(${rounds.answerCountryCode} = 'us' AND LOWER(${games.mapName}) NOT LIKE ${`%$us%`}) AND ${games.playerId} = ${playerId}`,
+          sql`(${rounds.answerCountryCode} = 'us' AND LOWER(${games.mapName}) NOT LIKE ${`%$u.s%`}) AND ${games.playerId} = ${playerId}`,
         ],
         sql` OR `,
       );
@@ -195,18 +196,20 @@ export const wrappedRouter = createTRPCRouter({
         .orderBy(
           desc(
             sql<number>`(
-              CAST(COUNT(CASE WHEN ${rounds.answerCountryCode} = ${rounds.guessCountryCode} THEN 1 END) AS FLOAT) / COUNT(*)
-            ) + (
-              CASE 
-                WHEN COUNT(CASE WHEN ${rounds.answerCountryCode} = ${rounds.guessCountryCode} THEN 1 END) = 0 
-                THEN -1.0 * COUNT(*) / 100.0
-                ELSE 0 
-              END
-            )`,
+            CAST(COUNT(CASE WHEN ${rounds.answerCountryCode} = ${rounds.guessCountryCode} THEN 1 END) AS FLOAT) / COUNT(*)
+          ) + (
+            CASE
+              WHEN COUNT(CASE WHEN ${rounds.answerCountryCode} = ${rounds.guessCountryCode} THEN 1 END) = 0
+              THEN -1.0 * COUNT(*) / 100.0
+              ELSE 0
+            END
+          )`,
           ),
-        )
-        .limit(4);
-      return query;
+        );
+      return query
+        .filter((row) => row.totalGuesses > 10)
+        .sort((a, b) => b.percentage - a.percentage)
+        .slice(0, 4);
     }),
 
   weakestCountries: publicProcedure
@@ -218,10 +221,10 @@ export const wrappedRouter = createTRPCRouter({
         [
           ...Object.entries(countryCodes).map(
             ([code, name]) =>
-              sql`(${rounds.answerCountryCode} = ${code.toLowerCase()} AND LOWER(${games.mapName}) NOT LIKE ${`%${name.toLowerCase()}%`})`,
+              sql`(${rounds.answerCountryCode} = ${code.toLowerCase()} AND LOWER(${games.mapName}) NOT LIKE ${`%${name.toLowerCase()}%`}) AND ${games.playerId} = ${playerId}`,
           ),
-          sql`(${rounds.answerCountryCode} = 'us' AND LOWER(${games.mapName}) NOT LIKE ${`%$us%`})`,
-          sql`(${rounds.answerCountryCode} = 'us' AND LOWER(${games.mapName}) NOT LIKE ${`%$u.s%`})`,
+          sql`(${rounds.answerCountryCode} = 'us' AND LOWER(${games.mapName}) NOT LIKE ${`%$us%`}) AND ${games.playerId} = ${playerId}`,
+          sql`(${rounds.answerCountryCode} = 'us' AND LOWER(${games.mapName}) NOT LIKE ${`%$u.s%`}) AND ${games.playerId} = ${playerId}`,
         ],
         sql` OR `,
       );
@@ -264,9 +267,11 @@ export const wrappedRouter = createTRPCRouter({
               END
             )`,
           ),
-        )
-        .limit(4);
-      return query;
+        );
+      return query
+        .filter((row) => row.totalGuesses > 10)
+        .sort((a, b) => a.percentage - b.percentage)
+        .slice(0, 4);
     }),
 
   scoreStats: publicProcedure
