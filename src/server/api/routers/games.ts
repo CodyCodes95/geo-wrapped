@@ -144,6 +144,7 @@ export const gameRouter = createTRPCRouter({
           mode: games.mode,
           gameTimeStarted: games.gameTimeStarted,
           roundId: rounds.roundId,
+          totalPoints: games.totalPoints,
           answer: {
             answerId: rounds.roundId, // Using roundId as answerId for compatibility
             lat: rounds.answerLat,

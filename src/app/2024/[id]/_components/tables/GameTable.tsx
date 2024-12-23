@@ -91,9 +91,7 @@ export const GameTable = () => {
           );
         case "score":
           return (
-            (a.reduce((sum, r) => sum + r.guess.points, 0) -
-              b.reduce((sum, r) => sum + r.guess.points, 0)) *
-            modifier
+            (gameA!.totalPoints ?? 0) - (gameB!.totalPoints ?? 0), modifier
           );
         default:
           if (
@@ -181,11 +179,7 @@ export const GameTable = () => {
                 <TableCell>{game?.mapName}</TableCell>
                 <TableCell>{game?.type}</TableCell>
                 <TableCell>{game?.mode}</TableCell>
-                <TableCell>
-                  {!isDuel
-                    ? rounds.reduce((sum, r) => sum + r.guess.points, 0)
-                    : "-"}
-                </TableCell>
+                <TableCell>{!isDuel ? game?.totalPoints : "-"}</TableCell>
                 <TableCell>{isDuel ? getGameResult(rounds) : "-"}</TableCell>
                 <TableCell>
                   {new Date(game?.gameTimeStarted ?? "").toLocaleString()}
