@@ -53,7 +53,7 @@ const Upload = () => {
       endpoint="geoDataUploader"
       onClientUploadComplete={(res) => {
         // Do something with the response
-        setWrappedUrl(`${window.location.origin}/${res[0]!.serverData.url}`);
+        setWrappedUrl(`${window.location.origin}${res[0]!.serverData.url}`);
       }}
       onUploadError={(error: Error) => {
         toast.error(
