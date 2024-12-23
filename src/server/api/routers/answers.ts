@@ -1,8 +1,8 @@
-import { and, avg, count, desc, eq, gte, lte } from "drizzle-orm";
+import { and, count, desc, eq, gte, lte } from "drizzle-orm";
 import { z } from "zod";
 
 import { createTRPCRouter, publicProcedure } from "~/server/api/trpc";
-import { answers, games, rounds } from "~/server/db/schema";
+import { games, rounds } from "~/server/db/schema";
 import { getMonthTimestampRange } from "~/utils";
 
 export const answerRouter = createTRPCRouter({
@@ -17,11 +17,10 @@ export const answerRouter = createTRPCRouter({
       const { start, end } = getMonthTimestampRange(input.selectedMonth);
       const query = await ctx.db
         .select({
-          country: answers.countryCode,
-          count: count(answers.answerId),
+          country: rounds.answerCountryCode,
+          count: count(rounds.roundId),
         })
-        .from(answers)
-        .innerJoin(rounds, eq(rounds.answerId, answers.answerId))
+        .from(rounds)
         .innerJoin(games, eq(rounds.gameId, games.gameId))
         .where(
           and(
@@ -30,8 +29,8 @@ export const answerRouter = createTRPCRouter({
             lte(games.gameTimeStarted, end),
           ),
         )
-        .groupBy(answers.countryCode)
-        .orderBy(desc(count(answers.answerId)));
+        .groupBy(rounds.answerCountryCode)
+        .orderBy(desc(count(rounds.roundId)));
       return query;
     }),
 });

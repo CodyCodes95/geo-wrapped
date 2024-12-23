@@ -40,6 +40,7 @@ export const games = sqliteTable(
   "games",
   {
     gameId: text("game_id").primaryKey(),
+    geoguessrGameId: text("geoguessr_game_id").notNull(),
     playerId: text("player_id")
       .notNull()
       .references(() => players.playerId),
@@ -53,7 +54,7 @@ export const games = sqliteTable(
       mode: "timestamp",
     }).notNull(),
     totalTime: integer("total_time").notNull(),
-    totalPoints: integer("total_points"), // New nullable column
+    totalPoints: integer("total_points"),
     mapName: text("map_name").notNull(),
     mapId: text("map_id").notNull(),
     createdAt: integer("created_at", { mode: "timestamp" })
@@ -75,19 +76,7 @@ export const games = sqliteTable(
   }),
 );
 
-// Answers table
-export const answers = sqliteTable("answers", {
-  answerId: text("answer_id").primaryKey(),
-  lat: real("lat").notNull(),
-  lng: real("lng").notNull(),
-  countryCode: text("country_code").notNull(),
-  googlePanoId: text("google_pano_id").notNull(),
-  heading: real("heading").notNull(),
-  pitch: real("pitch").notNull(),
-  zoom: real("zoom").notNull(),
-});
-
-// Rounds table
+// Consolidated Rounds table
 export const rounds = sqliteTable(
   "rounds",
   {
@@ -95,30 +84,22 @@ export const rounds = sqliteTable(
     gameId: text("game_id")
       .notNull()
       .references(() => games.gameId),
-    answerId: text("answer_id")
-      .notNull()
-      .references(() => answers.answerId),
     roundNo: integer("round_no").notNull(),
     multiplier: real("multiplier"), // Optional for duels
-  },
-  (table) => ({
-    gameIdIdx: index("rounds_game_id_idx").on(table.gameId),
-  }),
-);
 
-// Guesses table - now with unique roundId to enforce one-to-one relationship
-export const guesses = sqliteTable(
-  "guesses",
-  {
-    guessId: text("guess_id").primaryKey(),
-    roundId: text("round_id")
-      .notNull()
-      .unique() // This enforces one guess per round
-      .references(() => rounds.roundId),
-    geoguessrId: text("geoguessr_id").notNull(),
-    lat: real("lat").notNull(),
-    lng: real("lng").notNull(),
-    countryCode: text("country_code"),
+    // Answer data
+    answerLat: real("answer_lat").notNull(),
+    answerLng: real("answer_lng").notNull(),
+    answerCountryCode: text("answer_country_code").notNull(),
+    googlePanoId: text("google_pano_id").notNull(),
+    heading: real("heading").notNull(),
+    pitch: real("pitch").notNull(),
+    zoom: real("zoom").notNull(),
+
+    // Guess data
+    guessLat: real("guess_lat").notNull(),
+    guessLng: real("guess_lng").notNull(),
+    guessCountryCode: text("guess_country_code"),
     timedOut: integer("timed_out", { mode: "boolean" }).notNull(),
     points: integer("points").notNull(),
     distanceInMeters: real("distance_in_meters").notNull(),
@@ -127,8 +108,7 @@ export const guesses = sqliteTable(
     healthAfter: real("health_after"), // Optional for duels
   },
   (table) => ({
-    geoguessrIdIdx: index("guesses_geoguessr_id_idx").on(table.geoguessrId),
-    roundIdIdx: index("guesses_round_id_idx").on(table.roundId),
+    gameIdIdx: index("rounds_game_id_idx").on(table.gameId),
   }),
 );
 
@@ -157,24 +137,4 @@ export const roundsRelations = relations(rounds, ({ one }) => ({
     references: [games.gameId],
     relationName: "gameRounds",
   }),
-  answer: one(answers, {
-    fields: [rounds.answerId],
-    references: [answers.answerId],
-    relationName: "roundAnswer",
-  }),
-  guess: one(guesses, {
-    fields: [rounds.roundId],
-    references: [guesses.roundId],
-  }),
-}));
-
-export const guessesRelations = relations(guesses, ({ one }) => ({
-  round: one(rounds, {
-    fields: [guesses.roundId],
-    references: [rounds.roundId],
-  }),
-}));
-
-export const answersRelations = relations(answers, ({ many }) => ({
-  rounds: many(rounds, { relationName: "roundAnswer" }),
 }));

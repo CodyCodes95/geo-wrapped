@@ -1,8 +1,8 @@
-import { and, avg, count, eq, gte, lte, not } from "drizzle-orm";
+import { and, count, eq, gte, lte } from "drizzle-orm";
 import { z } from "zod";
 
 import { createTRPCRouter, publicProcedure } from "~/server/api/trpc";
-import { answers, games, rounds } from "~/server/db/schema";
+import { games, rounds } from "~/server/db/schema";
 import { getMonthTimestampRange } from "~/utils";
 
 export const roundRouter = createTRPCRouter({
@@ -23,18 +23,18 @@ export const roundRouter = createTRPCRouter({
         .where(
           and(
             eq(games.playerId, input.playerId),
-            gte(answers.lng, 135.685842),
-            lte(answers.lng, 135.8448),
-            gte(answers.lat, 35.45665),
-            lte(answers.lat, 35.535195),
+            gte(rounds.answerLng, 135.685842),
+            lte(rounds.answerLng, 135.8448),
+            gte(rounds.answerLat, 35.45665),
+            lte(rounds.answerLat, 35.535195),
             gte(games.gameTimeStarted, start),
             lte(games.gameTimeStarted, end),
           ),
         )
-        .innerJoin(games, eq(rounds.gameId, games.gameId))
-        .innerJoin(answers, eq(rounds.answerId, answers.answerId));
+        .innerJoin(games, eq(rounds.gameId, games.gameId));
       return query[0]?.count ?? 0;
     }),
+
   totalRoundCount: publicProcedure
     .input(
       z.object({

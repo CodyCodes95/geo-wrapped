@@ -6,7 +6,6 @@ import {
   desc,
   eq,
   gt,
-  gte,
   isNotNull,
   not,
   sql,
@@ -15,7 +14,7 @@ import {
 import { z } from "zod";
 
 import { createTRPCRouter, publicProcedure } from "~/server/api/trpc";
-import { answers, games, guesses, rounds } from "~/server/db/schema";
+import { games, rounds } from "~/server/db/schema";
 import { countryCodes } from "~/utils/countryCodes";
 
 export const wrappedRouter = createTRPCRouter({
@@ -76,11 +75,12 @@ export const wrappedRouter = createTRPCRouter({
         favouriteMode: favouriteMode[0]!.mode,
       };
     }),
+
   bestGames: publicProcedure
     .input(z.object({ playerId: z.string() }))
     .query(async ({ input, ctx }) => {
       const { playerId } = input;
-      // First get the top map by games played
+
       const bestGames = await ctx.db
         .select({
           gameMode: games.mode,
@@ -100,7 +100,7 @@ export const wrappedRouter = createTRPCRouter({
     .input(z.object({ playerId: z.string() }))
     .query(async ({ input, ctx }) => {
       const { playerId } = input;
-      // First get the top map by games played
+
       const topMapStats = await ctx.db
         .select({
           name: games.mapName,
@@ -118,12 +118,10 @@ export const wrappedRouter = createTRPCRouter({
         throw new Error("No top map found");
       }
 
-      // Get the best games for this map
       const bestGames = await ctx.db
         .select({
           gameMode: games.mode,
           points: games.totalPoints,
-          // You might need to construct this URL based on your application's needs
           summaryUrl: sql<string>`'/game/' || ${games.gameId}`,
         })
         .from(games)
@@ -137,10 +135,9 @@ export const wrappedRouter = createTRPCRouter({
         .orderBy(desc(games.totalPoints))
         .limit(3);
 
-      // Combine the results
       return {
         name: topMapStats[0]!.name,
-        gamesPlayed: Number(topMapStats[0]!.gamesPlayed), // Convert from BigInt if necessary
+        gamesPlayed: Number(topMapStats[0]!.gamesPlayed),
         minutesPlayed: Number(topMapStats[0]!.minutesPlayed),
         averageScore: Number(topMapStats[0]!.averageScore),
         bestGames: bestGames.map((game) => ({
@@ -150,61 +147,61 @@ export const wrappedRouter = createTRPCRouter({
         })),
       };
     }),
+
   strongestCountries: publicProcedure
     .input(z.object({ playerId: z.string() }))
     .query(async ({ input, ctx }) => {
       const { playerId } = input;
-      // Create an array of conditions for each country code and its name
+
       const countryExclusions = sql.join(
         [
           ...Object.entries(countryCodes).map(
             ([code, name]) =>
-              sql`(${answers.countryCode} = ${code.toLowerCase()} AND LOWER(${games.mapName}) NOT LIKE ${`%${name.toLowerCase()}%`})`,
+              sql`(${rounds.answerCountryCode} = ${code.toLowerCase()} AND LOWER(${games.mapName}) NOT LIKE ${`%${name.toLowerCase()}%`})`,
           ),
-          sql`(${answers.countryCode} = 'us' AND LOWER(${games.mapName}) NOT LIKE ${`%$us%`})`,
-          sql`(${answers.countryCode} = 'us' AND LOWER(${games.mapName}) NOT LIKE ${`%$u.s%`})`,
+          sql`(${rounds.answerCountryCode} = 'us' AND LOWER(${games.mapName}) NOT LIKE ${`%$us%`})`,
+          sql`(${rounds.answerCountryCode} = 'us' AND LOWER(${games.mapName}) NOT LIKE ${`%$u.s%`})`,
         ],
         sql` OR `,
       );
+
       const query = await ctx.db
         .select({
-          country: answers.countryCode,
-          correctGuesses: sql<number>`count(case when ${answers.countryCode} = ${guesses.countryCode} then 1 end)`,
-          totalGuesses: count(answers.answerId),
-          percentage: sql<number>`ROUND(CAST(COUNT(CASE WHEN ${answers.countryCode} = ${guesses.countryCode} THEN 1 END) AS FLOAT) / COUNT(*) * 100, 2)`,
+          country: rounds.answerCountryCode,
+          correctGuesses: sql<number>`count(case when ${rounds.answerCountryCode} = ${rounds.guessCountryCode} then 1 end)`,
+          totalGuesses: count(rounds.roundId),
+          percentage: sql<number>`ROUND(CAST(COUNT(CASE WHEN ${rounds.answerCountryCode} = ${rounds.guessCountryCode} THEN 1 END) AS FLOAT) / COUNT(*) * 100, 2)`,
           score: sql<number>`(
-          CAST(COUNT(CASE WHEN ${answers.countryCode} = ${guesses.countryCode} THEN 1 END) AS FLOAT) / COUNT(*)
-        ) + (
-          CASE 
-            WHEN COUNT(CASE WHEN ${answers.countryCode} = ${guesses.countryCode} THEN 1 END) = 0 
-            THEN -1.0 * COUNT(*) / 100.0
-            ELSE 0 
-          END
-        )`,
+            CAST(COUNT(CASE WHEN ${rounds.answerCountryCode} = ${rounds.guessCountryCode} THEN 1 END) AS FLOAT) / COUNT(*)
+          ) + (
+            CASE 
+              WHEN COUNT(CASE WHEN ${rounds.answerCountryCode} = ${rounds.guessCountryCode} THEN 1 END) = 0 
+              THEN -1.0 * COUNT(*) / 100.0
+              ELSE 0 
+            END
+          )`,
         })
-        .from(answers)
-        .innerJoin(rounds, eq(rounds.answerId, answers.answerId))
-        .innerJoin(guesses, eq(rounds.roundId, guesses.roundId))
+        .from(rounds)
         .innerJoin(games, eq(rounds.gameId, games.gameId))
         .where(
           and(
             eq(games.playerId, playerId),
-            not(eq(answers.countryCode, "Unknown")),
+            not(eq(rounds.answerCountryCode, "Unknown")),
             sql`${countryExclusions}`,
           ),
         )
-        .groupBy(answers.countryCode)
+        .groupBy(rounds.answerCountryCode)
         .orderBy(
           desc(
             sql<number>`(
-          CAST(COUNT(CASE WHEN ${answers.countryCode} = ${guesses.countryCode} THEN 1 END) AS FLOAT) / COUNT(*)
-        ) + (
-          CASE 
-            WHEN COUNT(CASE WHEN ${answers.countryCode} = ${guesses.countryCode} THEN 1 END) = 0 
-            THEN -1.0 * COUNT(*) / 100.0
-            ELSE 0 
-          END
-        )`,
+              CAST(COUNT(CASE WHEN ${rounds.answerCountryCode} = ${rounds.guessCountryCode} THEN 1 END) AS FLOAT) / COUNT(*)
+            ) + (
+              CASE 
+                WHEN COUNT(CASE WHEN ${rounds.answerCountryCode} = ${rounds.guessCountryCode} THEN 1 END) = 0 
+                THEN -1.0 * COUNT(*) / 100.0
+                ELSE 0 
+              END
+            )`,
           ),
         )
         .limit(4);
@@ -215,57 +212,56 @@ export const wrappedRouter = createTRPCRouter({
     .input(z.object({ playerId: z.string() }))
     .query(async ({ input, ctx }) => {
       const { playerId } = input;
-      // Create an array of conditions for each country code and its name
+
       const countryExclusions = sql.join(
         [
           ...Object.entries(countryCodes).map(
             ([code, name]) =>
-              sql`(${answers.countryCode} = ${code.toLowerCase()} AND LOWER(${games.mapName}) NOT LIKE ${`%${name.toLowerCase()}%`})`,
+              sql`(${rounds.answerCountryCode} = ${code.toLowerCase()} AND LOWER(${games.mapName}) NOT LIKE ${`%${name.toLowerCase()}%`})`,
           ),
-          sql`(${answers.countryCode} = 'us' AND LOWER(${games.mapName}) NOT LIKE ${`%$us%`})`,
-          sql`(${answers.countryCode} = 'us' AND LOWER(${games.mapName}) NOT LIKE ${`%$u.s%`})`,
+          sql`(${rounds.answerCountryCode} = 'us' AND LOWER(${games.mapName}) NOT LIKE ${`%$us%`})`,
+          sql`(${rounds.answerCountryCode} = 'us' AND LOWER(${games.mapName}) NOT LIKE ${`%$u.s%`})`,
         ],
         sql` OR `,
       );
+
       const query = await ctx.db
         .select({
-          country: answers.countryCode,
-          correctGuesses: sql<number>`count(case when ${answers.countryCode} = ${guesses.countryCode} then 1 end)`,
-          totalGuesses: count(answers.answerId),
-          percentage: sql<number>`ROUND(CAST(COUNT(CASE WHEN ${answers.countryCode} = ${guesses.countryCode} THEN 1 END) AS FLOAT) / COUNT(*) * 100, 2)`,
+          country: rounds.answerCountryCode,
+          correctGuesses: sql<number>`count(case when ${rounds.answerCountryCode} = ${rounds.guessCountryCode} then 1 end)`,
+          totalGuesses: count(rounds.roundId),
+          percentage: sql<number>`ROUND(CAST(COUNT(CASE WHEN ${rounds.answerCountryCode} = ${rounds.guessCountryCode} THEN 1 END) AS FLOAT) / COUNT(*) * 100, 2)`,
           score: sql<number>`(
-          CAST(COUNT(CASE WHEN ${answers.countryCode} = ${guesses.countryCode} THEN 1 END) AS FLOAT) / COUNT(*)
-        ) + (
-          CASE 
-            WHEN COUNT(CASE WHEN ${answers.countryCode} = ${guesses.countryCode} THEN 1 END) = 0 
-            THEN -1.0 * COUNT(*) / 100.0
-            ELSE 0 
-          END
-        )`,
+            CAST(COUNT(CASE WHEN ${rounds.answerCountryCode} = ${rounds.guessCountryCode} THEN 1 END) AS FLOAT) / COUNT(*)
+          ) + (
+            CASE 
+              WHEN COUNT(CASE WHEN ${rounds.answerCountryCode} = ${rounds.guessCountryCode} THEN 1 END) = 0 
+              THEN -1.0 * COUNT(*) / 100.0
+              ELSE 0 
+            END
+          )`,
         })
-        .from(answers)
-        .innerJoin(rounds, eq(rounds.answerId, answers.answerId))
-        .innerJoin(guesses, eq(rounds.roundId, guesses.roundId))
+        .from(rounds)
         .innerJoin(games, eq(rounds.gameId, games.gameId))
         .where(
           and(
             eq(games.playerId, playerId),
-            not(eq(answers.countryCode, "Unknown")),
+            not(eq(rounds.answerCountryCode, "Unknown")),
             sql`${countryExclusions}`,
           ),
         )
-        .groupBy(answers.countryCode)
+        .groupBy(rounds.answerCountryCode)
         .orderBy(
           asc(
             sql<number>`(
-          CAST(COUNT(CASE WHEN ${answers.countryCode} = ${guesses.countryCode} THEN 1 END) AS FLOAT) / COUNT(*)
-        ) + (
-          CASE 
-            WHEN COUNT(CASE WHEN ${answers.countryCode} = ${guesses.countryCode} THEN 1 END) = 0 
-            THEN -1.0 * COUNT(*) / 100.0
-            ELSE 0 
-          END
-        )`,
+              CAST(COUNT(CASE WHEN ${rounds.answerCountryCode} = ${rounds.guessCountryCode} THEN 1 END) AS FLOAT) / COUNT(*)
+            ) + (
+              CASE 
+                WHEN COUNT(CASE WHEN ${rounds.answerCountryCode} = ${rounds.guessCountryCode} THEN 1 END) = 0 
+                THEN -1.0 * COUNT(*) / 100.0
+                ELSE 0 
+              END
+            )`,
           ),
         )
         .limit(4);
@@ -279,22 +275,21 @@ export const wrappedRouter = createTRPCRouter({
 
       const stats = await ctx.db
         .select({
-          perfectScores: sql<number>`COUNT(CASE WHEN ${guesses.points} = 5000 AND ${guesses.timedOut} = 0 THEN 1 END)`,
-          zeroScores: sql<number>`COUNT(CASE WHEN ${guesses.points} = 0 THEN 1 END)`,
-          avgScore: avg(guesses.points),
-          avgTime: avg(guesses.timeInSeconds),
-          avgDistance: sql<number>`AVG(CASE WHEN ${guesses.timedOut} = 0 THEN ${guesses.distanceInMeters} END)`,
-          timedOutGuesses: sql<number>`COUNT(CASE WHEN ${guesses.timedOut} = 1 THEN 1 END)`,
+          perfectScores: sql<number>`COUNT(CASE WHEN ${rounds.points} = 5000 AND ${rounds.timedOut} = 0 THEN 1 END)`,
+          zeroScores: sql<number>`COUNT(CASE WHEN ${rounds.points} = 0 THEN 1 END)`,
+          avgScore: avg(rounds.points),
+          avgTime: avg(rounds.timeInSeconds),
+          avgDistance: sql<number>`AVG(CASE WHEN ${rounds.timedOut} = 0 THEN ${rounds.distanceInMeters} END)`,
+          timedOutGuesses: sql<number>`COUNT(CASE WHEN ${rounds.timedOut} = 1 THEN 1 END)`,
         })
-        .from(guesses)
-        .innerJoin(rounds, eq(rounds.roundId, guesses.roundId))
+        .from(rounds)
         .innerJoin(games, eq(games.gameId, rounds.gameId))
         .where(eq(games.playerId, playerId));
 
       const topGuesses = await ctx.db
         .select({
-          points: guesses.points,
-          distanceInMeters: guesses.distanceInMeters,
+          points: rounds.points,
+          distanceInMeters: rounds.distanceInMeters,
           mapName: games.mapName,
           gameMode: games.mode,
           gameType: games.type,
@@ -302,13 +297,12 @@ export const wrappedRouter = createTRPCRouter({
             WHEN ${games.type} = 'Standard' THEN '/results/' || ${games.gameId}
             ELSE '/duels/' || ${games.gameId} || '/summary'
           END`,
-          timeInSeconds: guesses.timeInSeconds,
+          timeInSeconds: rounds.timeInSeconds,
         })
-        .from(guesses)
-        .innerJoin(rounds, eq(rounds.roundId, guesses.roundId))
+        .from(rounds)
         .innerJoin(games, eq(games.gameId, rounds.gameId))
-        .where(and(eq(games.playerId, playerId), eq(guesses.timedOut, false)))
-        .orderBy(desc(guesses.points), asc(guesses.distanceInMeters))
+        .where(and(eq(games.playerId, playerId), eq(rounds.timedOut, false)))
+        .orderBy(desc(rounds.points), asc(rounds.distanceInMeters))
         .limit(3);
 
       return {
@@ -317,30 +311,11 @@ export const wrappedRouter = createTRPCRouter({
         zeroScores: Number(stats[0]?.zeroScores ?? 0),
         avgScore: Number(stats[0]?.avgScore ?? 0),
         avgTime: Number(stats[0]?.avgTime ?? 0),
-        avgDistance: Number(stats[0]?.avgDistance ?? 0) / 1000, // Convert to km
+        avgDistance: Number(stats[0]?.avgDistance ?? 0) / 1000,
         topGuesses,
       };
     }),
-  // competitiveStats: publicProcedure
-  //   .input(z.object({ playerId: z.string() }))
-  //   .query(async ({ input, ctx }) => {
-  //     const { playerId } = input;
-  //     const stats = await ctx.db
-  //       .select({
-  //         gamesPlayed: count(games.gameId),
-  //         avgScore: avg(guesses.points),
-  //         // count of games where the last guess healthAfter is greater than 0
-  //         flawLessVictories: count(
-  //       })
-  //       .from(games)
-  //       .where(and(eq(games.playerId, playerId), eq(games.type, "Duel")))
-  //     .innerJoin(guesses, eq(guesses.roundId, rounds.roundId))
-  //     .innerJoin(rounds, eq(rounds.gameId, games.gameId))
 
-  //     return {
-  //       gamesPlayed: Number(stats[0]?.gamesPlayed ?? 0),
-  //     };
-  //   }),
   competitiveStats: publicProcedure
     .input(z.object({ playerId: z.string() }))
     .query(async ({ input, ctx }) => {
@@ -351,20 +326,19 @@ export const wrappedRouter = createTRPCRouter({
         ctx.db
           .select({
             gameId: games.gameId,
-            healthAfter: guesses.healthAfter,
+            healthAfter: rounds.healthAfter,
           })
           .from(games)
           .innerJoin(rounds, eq(rounds.gameId, games.gameId))
-          .innerJoin(guesses, eq(guesses.roundId, rounds.roundId))
           .where(
             and(
               eq(games.playerId, playerId),
               eq(games.type, "Duel"),
               sql`${rounds.roundNo} = (
-              select max(round_no)
-              from ${rounds} r2
-              where r2.game_id = ${games.gameId}
-            )`,
+                select max(round_no)
+                from ${rounds} r2
+                where r2.game_id = ${games.gameId}
+              )`,
             ),
           ),
       );
@@ -376,12 +350,11 @@ export const wrappedRouter = createTRPCRouter({
           totalDuels: count(games.gameId),
           totalDuelsWon: sql<number>`count(case when ${lastRoundHealth.healthAfter} > 0 then 1 end)`,
           flawlessVictories: sql<number>`count(case when ${lastRoundHealth.healthAfter} = 6000 then 1 end)`,
-          avgScore: avg(guesses.points),
+          avgScore: avg(rounds.points),
         })
         .from(games)
         .innerJoin(lastRoundHealth, eq(lastRoundHealth.gameId, games.gameId))
         .innerJoin(rounds, eq(rounds.gameId, games.gameId))
-        .innerJoin(guesses, eq(guesses.roundId, rounds.roundId))
         .where(and(eq(games.playerId, playerId), eq(games.type, "Duel")));
 
       // Top 3 toughest won duels
@@ -391,16 +364,15 @@ export const wrappedRouter = createTRPCRouter({
           mapName: games.mapName,
           roundCount: count(rounds.roundId),
           totalPoints: games.totalPoints,
-          healthAfter: guesses.healthAfter,
+          healthAfter: rounds.healthAfter,
         })
         .from(games)
         .innerJoin(rounds, eq(rounds.gameId, games.gameId))
-        .innerJoin(guesses, eq(guesses.roundId, rounds.roundId))
         .where(
           and(
             eq(games.playerId, playerId),
             eq(games.type, "Duel"),
-            gt(guesses.healthAfter, 0),
+            gt(rounds.healthAfter, 0),
           ),
         )
         .groupBy(games.gameId)

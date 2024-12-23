@@ -1,7 +1,6 @@
 import {
   and,
   count,
-  countDistinct,
   desc,
   eq,
   gte,
@@ -12,7 +11,7 @@ import { z } from "zod";
 import Supercluster from "supercluster";
 
 import { createTRPCRouter, publicProcedure } from "~/server/api/trpc";
-import { answers, games, guesses, rounds } from "~/server/db/schema";
+import { games, rounds } from "~/server/db/schema";
 import { getMonthTimestampRange } from "~/utils";
 import { type RoundAnswer } from "~/store/mapStore";
 
@@ -39,6 +38,7 @@ export const gameRouter = createTRPCRouter({
 
       return gamesCount[0]?.count;
     }),
+
   gameTypes: publicProcedure
     .input(
       z.object({
@@ -69,6 +69,7 @@ export const gameRouter = createTRPCRouter({
         duel: query.find((t) => t.type === "Duel")?.count ?? 0,
       };
     }),
+
   gameModes: publicProcedure
     .input(
       z.object({
@@ -100,6 +101,7 @@ export const gameRouter = createTRPCRouter({
         nmpz: query.find((t) => t.mode === "NMPZ")?.count ?? 0,
       };
     }),
+
   getFavouriteMaps: publicProcedure
     .input(
       z.object({
@@ -124,6 +126,7 @@ export const gameRouter = createTRPCRouter({
 
       return gamesCount;
     }),
+
   getAllWithResults: publicProcedure
     .input(
       z.object({
@@ -141,27 +144,44 @@ export const gameRouter = createTRPCRouter({
           mode: games.mode,
           gameTimeStarted: games.gameTimeStarted,
           roundId: rounds.roundId,
-          answerId: answers.answerId,
-          guessId: guesses.guessId,
-          answer: answers,
-          guess: guesses,
+          answer: {
+            answerId: rounds.roundId, // Using roundId as answerId for compatibility
+            lat: rounds.answerLat,
+            lng: rounds.answerLng,
+            countryCode: rounds.answerCountryCode,
+            googlePanoId: rounds.googlePanoId,
+            heading: rounds.heading,
+            pitch: rounds.pitch,
+            zoom: rounds.zoom,
+          },
+          guess: {
+            guessId: rounds.roundId, // Using roundId as guessId for compatibility
+            lat: rounds.guessLat,
+            lng: rounds.guessLng,
+            countryCode: rounds.guessCountryCode,
+            timedOut: rounds.timedOut,
+            points: rounds.points,
+            distanceInMeters: rounds.distanceInMeters,
+            timeInSeconds: rounds.timeInSeconds,
+            healthBefore: rounds.healthBefore,
+            healthAfter: rounds.healthAfter,
+          },
         })
         .from(games)
         .innerJoin(rounds, eq(games.gameId, rounds.gameId))
-        .innerJoin(answers, eq(rounds.answerId, answers.answerId))
-        .innerJoin(guesses, eq(rounds.roundId, guesses.roundId))
         .where(
           and(
             eq(games.playerId, input.playerId),
             gte(games.gameTimeStarted, start),
             lte(games.gameTimeStarted, end),
-            not(eq(guesses.lat, 0)),
-            not(eq(guesses.lng, 0)),
+            not(eq(rounds.guessLat, 0)),
+            not(eq(rounds.guessLng, 0)),
           ),
         );
 
       return query;
     }),
+
   getClusteredMarkers: publicProcedure
     .input(
       z.object({
@@ -181,20 +201,29 @@ export const gameRouter = createTRPCRouter({
       const rawData = await ctx.db
         .select({
           roundId: rounds.roundId,
-          guess: guesses,
-          answer: answers,
+          guess: {
+            lat: rounds.guessLat,
+            lng: rounds.guessLng,
+          },
+          answer: {
+            lat: rounds.answerLat,
+            lng: rounds.answerLng,
+            countryCode: rounds.answerCountryCode,
+            googlePanoId: rounds.googlePanoId,
+            heading: rounds.heading,
+            pitch: rounds.pitch,
+            zoom: rounds.zoom,
+          },
         })
         .from(games)
         .innerJoin(rounds, eq(games.gameId, rounds.gameId))
-        .innerJoin(answers, eq(rounds.answerId, answers.answerId))
-        .innerJoin(guesses, eq(rounds.roundId, guesses.roundId))
         .where(
           and(
             eq(games.playerId, input.playerId),
             gte(games.gameTimeStarted, start),
             lte(games.gameTimeStarted, end),
-            not(eq(guesses.lat, 0)),
-            not(eq(guesses.lng, 0)),
+            not(eq(rounds.guessLat, 0)),
+            not(eq(rounds.guessLng, 0)),
           ),
         );
 
