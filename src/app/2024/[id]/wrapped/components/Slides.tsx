@@ -314,7 +314,7 @@ export const CompteitivePerformanceSlide = ({ stats }: Props) => {
           transition={{ delay: 0.8 }}
           className="flex flex-col items-center gap-2 rounded-lg border border-primary/20 p-6 text-center"
         >
-          <span className="text-5xl font-bold text-yellow-500">
+          <span className="text-5xl font-bold text-primary">
             {stats.competitiveStats.flawlessVictories}
           </span>
           <span className="text-xl text-muted-foreground">
