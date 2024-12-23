@@ -8,6 +8,7 @@ import { useMapStateStore } from "~/store/mapStateStore";
 const Map = () => {
   const updateBoundsAndZoom = (map: google.maps.Map) => {
     const bounds = map.getBounds();
+    console.log(bounds);
     const zoom = map.getZoom();
     if (bounds && zoom) {
       useMapStateStore.setState({
@@ -29,7 +30,6 @@ const Map = () => {
   return (
     <APIProvider apiKey={env.NEXT_PUBLIC_GOOGLE_API_KEY}>
       <GoogleMap
-        
         clickableIcons={false}
         mapId={env.NEXT_PUBLIC_GOOGLE_MAP_ID}
         style={{ width: "100%", height: "60vh" }}

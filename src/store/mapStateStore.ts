@@ -11,7 +11,17 @@ type MapState = {
 };
 
 export const useMapStateStore = create<MapState>((set) => ({
-  bounds: null,
+  bounds: {
+    // default bounds should fit whole earth
+    ne: {
+      lat: 90,
+      lng: 180,
+    },
+    sw: {
+      lat: -90,
+      lng: -180,
+    },
+  },
   zoom: 2,
   setBounds: (bounds) => set({ bounds }),
   setZoom: (zoom) => set({ zoom }),
