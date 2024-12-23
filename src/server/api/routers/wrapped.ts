@@ -122,7 +122,7 @@ export const wrappedRouter = createTRPCRouter({
         .select({
           gameMode: games.mode,
           points: games.totalPoints,
-          summaryUrl: sql<string>`'/game/' || ${games.gameId}`,
+          summaryUrl: sql<string>`'/game/' || ${games.geoguessrGameId}`,
         })
         .from(games)
         .where(
@@ -294,8 +294,8 @@ export const wrappedRouter = createTRPCRouter({
           gameMode: games.mode,
           gameType: games.type,
           gameUrl: sql<string>`CASE 
-            WHEN ${games.type} = 'Standard' THEN '/results/' || ${games.gameId}
-            ELSE '/duels/' || ${games.gameId} || '/summary'
+            WHEN ${games.type} = 'Standard' THEN '/results/' || ${games.geoguessrGameId}
+            ELSE '/duels/' || ${games.geoguessrGameId} || '/summary'
           END`,
           timeInSeconds: rounds.timeInSeconds,
         })
