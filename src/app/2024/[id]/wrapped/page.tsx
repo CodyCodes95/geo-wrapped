@@ -60,11 +60,13 @@ export type WrappedStats = {
     country: string;
     correctGuesses: number;
     totalGuesses: number;
+    percentage: number;
   }[];
   weakestCountries: {
     country: string;
     correctGuesses: number;
     totalGuesses: number;
+    percentage: number;
   }[];
   topSong: {
     name: string;

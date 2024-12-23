@@ -1,7 +1,7 @@
 "use client";
+import { useState } from "react";
 import { motion } from "framer-motion";
 import { getCountryFlagEmoji } from "~/utils";
-import { type YearStats } from "./Wrapped";
 import {
   Tooltip,
   TooltipContent,
@@ -427,76 +427,126 @@ export const SummarySlide = ({ stats }: Props) => (
   </div>
 );
 
-export const WeakestCountries = ({ stats }: Props) => (
-  <div className="flex min-h-screen flex-col items-center justify-center gap-4 bg-[#191414]">
-    <h1 className="bg bg-clip-text text-4xl font-bold text-primary">
-      Your Weakest Countries
-    </h1>
-    <div className="mb-12 text-gray-400">Imagine getting these wrong 💀</div>
+export const WeakestCountries = ({ stats }: Props) => {
+  const [showAll, setShowAll] = useState(false);
+  const displayedCountries = showAll
+    ? stats.weakestCountries
+    : stats.weakestCountries.slice(0, 4);
 
-    <div className="grid max-w-2xl grid-cols-2 gap-8">
-      {stats.weakestCountries.map((stat, index) => (
-        <motion.div
-          key={stat.country}
-          initial={{ x: index % 2 === 0 ? -50 : 50, opacity: 0 }}
-          animate={{ x: 0, opacity: 1 }}
-          transition={{ delay: index * 0.2 }}
-          className="flex flex-col gap-2 text-center"
+  return (
+    <div className="flex min-h-screen flex-col items-center justify-center gap-4 bg-[#191414] p-4">
+      <h1 className="bg bg-clip-text text-4xl font-bold text-primary">
+        Your Weakest Countries
+      </h1>
+      <div className="mb-12 text-gray-400">Imagine getting these wrong 💀</div>
+
+      <div
+        className={`grid max-w-2xl ${showAll ? "grid-cols-1" : "grid-cols-2"} gap-8`}
+      >
+        {displayedCountries.map((stat, index) => (
+          <motion.div
+            key={stat.country}
+            initial={{
+              x: showAll ? 0 : index % 2 === 0 ? -50 : 50,
+              opacity: 0,
+            }}
+            animate={{ x: 0, opacity: 1 }}
+            transition={{ delay: index * 0.1 }}
+            className={`flex ${showAll ? "flex-row" : "flex-col"} items-center gap-4 text-center`}
+          >
+            <TooltipProvider>
+              <Tooltip delayDuration={0}>
+                <TooltipTrigger className="cursor-pointer text-6xl">
+                  {getCountryFlagEmoji(stat.country)}
+                </TooltipTrigger>
+                <TooltipContent>
+                  <span>{getCountryName(stat.country)}</span>
+                </TooltipContent>
+              </Tooltip>
+            </TooltipProvider>
+            <div className="flex flex-col">
+              <p className="text-sm">
+                {stat.correctGuesses} out of {stat.totalGuesses} rounds
+              </p>
+              <p className="text-xs text-primary">{stat.percentage}% correct</p>
+            </div>
+          </motion.div>
+        ))}
+      </div>
+
+      {!showAll && stats.weakestCountries.length > 4 && (
+        <motion.button
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          onClick={() => setShowAll(true)}
+          className="mt-4 rounded-full bg-primary/10 px-6 py-2 text-primary hover:bg-primary/20"
         >
-          <TooltipProvider>
-            <Tooltip delayDuration={0}>
-              <TooltipTrigger className="cursor-pointer text-6xl">
-                {getCountryFlagEmoji(stat.country)}
-              </TooltipTrigger>
-              <TooltipContent>
-                <span>{getCountryName(stat.country)}</span>
-              </TooltipContent>
-            </Tooltip>
-          </TooltipProvider>
-          <p>
-            Guessed correctly {stat.correctGuesses} out of {stat.totalGuesses}{" "}
-            rounds
-          </p>
-        </motion.div>
-      ))}
+          See top 20
+        </motion.button>
+      )}
     </div>
-  </div>
-);
+  );
+};
 
-export const StrongestCountries = ({ stats }: Props) => (
-  <div className="flex min-h-screen flex-col items-center justify-center gap-4 bg-[#191414]">
-    <h1 className="bg bg-clip-text text-4xl font-bold text-primary">
-      Your Strongest Countries
-    </h1>
-    <div className="mb-12 text-gray-400">
-      You were most accurate guessing these countries
-    </div>
+export const StrongestCountries = ({ stats }: Props) => {
+  const [showAll, setShowAll] = useState(false);
+  const displayedCountries = showAll
+    ? stats.strongestCountries
+    : stats.strongestCountries.slice(0, 4);
 
-    <div className="grid max-w-2xl grid-cols-2 gap-8">
-      {stats.strongestCountries.map((stat, index) => (
-        <motion.div
-          key={stat.country}
-          initial={{ x: index % 2 === 0 ? -50 : 50, opacity: 0 }}
-          animate={{ x: 0, opacity: 1 }}
-          transition={{ delay: index * 0.2 }}
-          className="flex flex-col gap-2 text-center"
+  return (
+    <div className="flex min-h-screen flex-col items-center justify-center gap-4 bg-[#191414] p-4">
+      <h1 className="bg bg-clip-text text-4xl font-bold text-primary">
+        Your Strongest Countries
+      </h1>
+      <div className="mb-12 text-gray-400">
+        You were most accurate guessing these countries
+      </div>
+
+      <div
+        className={`grid max-w-2xl ${showAll ? "grid-cols-1" : "grid-cols-2"} gap-8`}
+      >
+        {displayedCountries.map((stat, index) => (
+          <motion.div
+            key={stat.country}
+            initial={{
+              x: showAll ? 0 : index % 2 === 0 ? -50 : 50,
+              opacity: 0,
+            }}
+            animate={{ x: 0, opacity: 1 }}
+            transition={{ delay: index * 0.1 }}
+            className={`flex ${showAll ? "flex-row" : "flex-col"} items-center gap-4 text-center`}
+          >
+            <TooltipProvider>
+              <Tooltip delayDuration={0}>
+                <TooltipTrigger className="cursor-pointer text-6xl">
+                  {getCountryFlagEmoji(stat.country)}
+                </TooltipTrigger>
+                <TooltipContent>
+                  <span>{getCountryName(stat.country)}</span>
+                </TooltipContent>
+              </Tooltip>
+            </TooltipProvider>
+            <div className="flex flex-col">
+              <p className="text-sm">
+                {stat.correctGuesses} out of {stat.totalGuesses} rounds
+              </p>
+              <p className="text-xs text-primary">{stat.percentage}% correct</p>
+            </div>
+          </motion.div>
+        ))}
+      </div>
+
+      {!showAll && stats.strongestCountries.length > 4 && (
+        <motion.button
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          onClick={() => setShowAll(true)}
+          className="mt-4 rounded-full bg-primary/10 px-6 py-2 text-primary hover:bg-primary/20"
         >
-          <TooltipProvider>
-            <Tooltip delayDuration={0}>
-              <TooltipTrigger className="cursor-pointer text-6xl">
-                {getCountryFlagEmoji(stat.country)}
-              </TooltipTrigger>
-              <TooltipContent>
-                <span>{getCountryName(stat.country)}</span>
-              </TooltipContent>
-            </Tooltip>
-          </TooltipProvider>
-          <p>
-            Guessed correctly {stat.correctGuesses} out of {stat.totalGuesses}{" "}
-            rounds
-          </p>
-        </motion.div>
-      ))}
+          See top 20
+        </motion.button>
+      )}
     </div>
-  </div>
-);
+  );
+};

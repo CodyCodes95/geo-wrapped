@@ -209,7 +209,7 @@ export const wrappedRouter = createTRPCRouter({
       return query
         .filter((row) => row.totalGuesses > 10)
         .sort((a, b) => b.percentage - a.percentage)
-        .slice(0, 4);
+        .slice(0, 20);
     }),
 
   weakestCountries: publicProcedure
@@ -271,7 +271,7 @@ export const wrappedRouter = createTRPCRouter({
       return query
         .filter((row) => row.totalGuesses > 10)
         .sort((a, b) => a.percentage - b.percentage)
-        .slice(0, 4);
+        .slice(0, 20);
     }),
 
   scoreStats: publicProcedure
