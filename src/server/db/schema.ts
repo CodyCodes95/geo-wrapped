@@ -55,6 +55,7 @@ export const games = sqliteTable(
     }).notNull(),
     totalTime: integer("total_time").notNull(),
     totalPoints: integer("total_points"),
+    wonDuel: integer("timed_out", { mode: "boolean" }).notNull().default(false),
     mapName: text("map_name").notNull(),
     mapId: text("map_id").notNull(),
     createdAt: integer("created_at", { mode: "timestamp" })
