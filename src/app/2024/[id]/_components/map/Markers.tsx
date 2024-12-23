@@ -10,7 +10,7 @@ import {
 } from "@vis.gl/react-google-maps";
 import { Button } from "~/components/ui/button";
 import { type RoundAnswer, useMapStore } from "~/store/mapStore";
-import { useMapStateStore } from "~/store/clusterStore";
+import { useMapStateStore } from "~/store/mapStateStore";
 import { ClusterMarker } from "./ClusterMarker";
 import { buildStreetViewUrl } from "~/utils/googleMaps";
 import { keepPreviousData } from "@tanstack/react-query";
