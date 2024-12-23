@@ -40,7 +40,7 @@ const Upload = () => {
             </button>
           </div>
           <p className="mt-4 text-sm">
-            Come back in about 30 minutes to see your year in review!
+            Come back in about soon to see your year in review!
           </p>
         </CardContent>
       </Card>
