@@ -321,41 +321,16 @@ export const wrappedRouter = createTRPCRouter({
     .query(async ({ input, ctx }) => {
       const { playerId } = input;
 
-      // Create a subquery for last round health
-      const lastRoundHealth = ctx.db.$with("last_round_health").as(
-        ctx.db
-          .select({
-            gameId: games.gameId,
-            healthAfter: rounds.healthAfter,
-          })
-          .from(games)
-          .innerJoin(rounds, eq(rounds.gameId, games.gameId))
-          .where(
-            and(
-              eq(games.playerId, playerId),
-              eq(games.type, "Duel"),
-              sql`${rounds.roundNo} = (
-                select max(round_no)
-                from ${rounds} r2
-                where r2.game_id = ${games.gameId}
-              )`,
-            ),
-          ),
-      );
-
-      // Main query using the WITH clause
       const duelStats = await ctx.db
-        .with(lastRoundHealth)
         .select({
           totalDuels: count(games.gameId),
-          totalDuelsWon: sql<number>`count(case when ${lastRoundHealth.healthAfter} > 0 then 1 end)`,
-          flawlessVictories: sql<number>`count(case when ${lastRoundHealth.healthAfter} = 6000 then 1 end)`,
-          avgScore: avg(rounds.points),
+          totalDuelsWon: sql<number>`count(case when ${games.wonDuel} then 1 end)`,
+          averageScore: avg(rounds.points),
+          flawlessVictories: sql<number>`count(case when ${games.isFlawLess} then 1 end)`,
         })
         .from(games)
-        .innerJoin(lastRoundHealth, eq(lastRoundHealth.gameId, games.gameId))
-        .innerJoin(rounds, eq(rounds.gameId, games.gameId))
-        .where(and(eq(games.playerId, playerId), eq(games.type, "Duel")));
+        .where(and(eq(games.playerId, playerId), eq(games.type, "Duel")))
+        .innerJoin(rounds, eq(rounds.gameId, games.gameId));
 
       // Top 3 toughest won duels
       const toughestWonDuels = await ctx.db
@@ -389,7 +364,7 @@ export const wrappedRouter = createTRPCRouter({
           (Number(stats.totalDuelsWon) / Number(stats.totalDuels)) * 100,
         ),
         flawlessVictories: Number(stats.flawlessVictories),
-        avgScore: Math.round(Number(stats.avgScore)),
+        avgScore: Math.round(Number(stats.averageScore)),
         toughestWonDuels: toughestWonDuels.map((duel) => ({
           mapName: duel.mapName,
           roundCount: Number(duel.roundCount),
