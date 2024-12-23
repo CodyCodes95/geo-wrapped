@@ -3,6 +3,7 @@ import {
   asc,
   avg,
   count,
+  countDistinct,
   desc,
   eq,
   gt,
@@ -323,14 +324,13 @@ export const wrappedRouter = createTRPCRouter({
 
       const duelStats = await ctx.db
         .select({
-          totalDuels: count(games.gameId),
+          totalDuels: countDistinct(games.gameId),
           totalDuelsWon: sql<number>`count(case when ${games.wonDuel} then 1 end)`,
-          averageScore: avg(rounds.points),
+          averageScore: avg(games.totalPoints),
           flawlessVictories: sql<number>`count(case when ${games.isFlawLess} then 1 end)`,
         })
         .from(games)
-        .where(and(eq(games.playerId, playerId), eq(games.type, "Duel")))
-        .innerJoin(rounds, eq(rounds.gameId, games.gameId));
+        .where(and(eq(games.playerId, playerId), eq(games.type, "Duel")));
 
       // Top 3 toughest won duels
       const toughestWonDuels = await ctx.db

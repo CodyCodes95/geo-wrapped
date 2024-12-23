@@ -11,6 +11,7 @@ import {
   SummarySlide,
 } from "./Slides";
 import { type WrappedStats } from "../page";
+import { parseAsInteger, useQueryState } from "nuqs";
 
 export type YearStats = {
   topGenre: {
@@ -64,13 +65,16 @@ const slides = [
 ];
 
 const Wrapped = ({ stats }: { stats: WrappedStats }) => {
-  const [currentSlide, setCurrentSlide] = useState(0);
+  const [currentSlide, setCurrentSlide] = useQueryState(
+    "slide",
+    parseAsInteger.withDefault(0),
+  );
 
   const handleKeyDown = (e: KeyboardEvent) => {
     if (e.code === "Space" || e.code === "ArrowRight") {
-      setCurrentSlide((prev) => Math.min(prev + 1, slides.length - 1));
+      void setCurrentSlide((prev) => Math.min(prev + 1, slides.length - 1));
     } else if (e.code === "ArrowLeft") {
-      setCurrentSlide((prev) => Math.max(prev - 1, 0));
+      void setCurrentSlide((prev) => Math.max(prev - 1, 0));
     }
   };
 

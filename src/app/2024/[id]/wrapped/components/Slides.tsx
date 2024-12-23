@@ -296,6 +296,17 @@ export const CompteitivePerformanceSlide = ({ stats }: Props) => {
             {stats.competitiveStats.winPercentage}% win rate
           </span>
         </motion.div>
+        <motion.div
+          initial={{ scale: 0, opacity: 0 }}
+          animate={{ scale: 1, opacity: 1 }}
+          transition={{ delay: 0.4 }}
+          className="flex flex-col items-center gap-2 rounded-lg border border-primary/20 p-6 text-center"
+        >
+          <span className="text-5xl font-bold text-green-500">
+            {stats.competitiveStats.winPercentage}%
+          </span>
+          <span className="text-xl text-muted-foreground">Win rate</span>
+        </motion.div>
 
         <motion.div
           initial={{ scale: 0, opacity: 0 }}
@@ -309,9 +320,6 @@ export const CompteitivePerformanceSlide = ({ stats }: Props) => {
           <span className="text-xl text-muted-foreground">
             Flawless Victories
           </span>
-          <span className="text-sm text-muted-foreground">
-            Perfect 6000 health wins
-          </span>
         </motion.div>
 
         <motion.div
@@ -324,9 +332,6 @@ export const CompteitivePerformanceSlide = ({ stats }: Props) => {
             {stats.competitiveStats.avgScore}
           </span>
           <span className="text-xl text-muted-foreground">Average Score</span>
-          <span className="text-sm text-muted-foreground">
-            Points per guess
-          </span>
         </motion.div>
       </div>
 
