@@ -12,7 +12,7 @@ type MapState = {
 
 export const useMapStateStore = create<MapState>((set) => ({
   bounds: null,
-  zoom: 1,
+  zoom: 2,
   setBounds: (bounds) => set({ bounds }),
   setZoom: (zoom) => set({ zoom }),
 }));

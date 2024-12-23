@@ -3,7 +3,7 @@ import React from "react";
 import { APIProvider, Map as GoogleMap } from "@vis.gl/react-google-maps";
 import { env } from "~/env";
 import Markers from "./Markers";
-import { useMapStateStore } from "~/store/clusterStore";
+import { useMapStateStore } from "~/store/mapStateStore";
 
 const Map = () => {
   const updateBoundsAndZoom = (map: google.maps.Map) => {
@@ -29,6 +29,7 @@ const Map = () => {
   return (
     <APIProvider apiKey={env.NEXT_PUBLIC_GOOGLE_API_KEY}>
       <GoogleMap
+        
         clickableIcons={false}
         mapId={env.NEXT_PUBLIC_GOOGLE_MAP_ID}
         style={{ width: "100%", height: "60vh" }}
