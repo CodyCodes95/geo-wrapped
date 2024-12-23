@@ -108,17 +108,17 @@ export default async function Page({
     return <ProcessingSlide />;
   }
 
-  const strongestCountriesQuery = await api.wrapped.strongestCountries({
+  const strongestCountriesQuery = api.wrapped.strongestCountries({
     playerId: id,
   });
-  const weakestCountriesQuery = await api.wrapped.weakestCountries({
+  const weakestCountriesQuery = api.wrapped.weakestCountries({
     playerId: id,
   });
-  const totalStatsQuery = await api.wrapped.totalGamesSummary({ playerId: id });
-  const topMapuery = await api.wrapped.topMap({ playerId: id });
-  const bestGamesQuery = await api.wrapped.bestGames({ playerId: id });
-  const scoreStatsQuery = await api.wrapped.scoreStats({ playerId: id });
-  const competitiveStatsQuery = await api.wrapped.competitiveStats({
+  const totalStatsQuery = api.wrapped.totalGamesSummary({ playerId: id });
+  const topMapuery = api.wrapped.topMap({ playerId: id });
+  const bestGamesQuery = api.wrapped.bestGames({ playerId: id });
+  const scoreStatsQuery = api.wrapped.scoreStats({ playerId: id });
+  const competitiveStatsQuery = api.wrapped.competitiveStats({
     playerId: id,
   });
 
