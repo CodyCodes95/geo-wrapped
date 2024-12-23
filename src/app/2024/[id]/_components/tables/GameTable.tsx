@@ -175,7 +175,7 @@ export const GameTable = () => {
                     answer: r.answer,
                   }));
                   setSelectedRounds(selectedRounds);
-                  window.scrollTo({ top: 0, behavior: "smooth" });
+                  window.scrollTo({ top: 350, behavior: "smooth" });
                 }}
               >
                 <TableCell>{game?.mapName}</TableCell>

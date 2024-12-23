@@ -163,7 +163,7 @@ export const RoundTable = () => {
                   answer: round.answer,
                 };
                 setSelectedRounds([selectedRound]);
-                window.scrollTo({ top: 0, behavior: "smooth" });
+                window.scrollTo({ top: 350, behavior: "smooth" });
               }}
             >
               <TableCell>{round.mapName}</TableCell>
