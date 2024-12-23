@@ -292,9 +292,6 @@ export const CompteitivePerformanceSlide = ({ stats }: Props) => {
             {stats.competitiveStats.totalDuelsWon}
           </span>
           <span className="text-xl text-muted-foreground">Duels Won</span>
-          <span className="text-sm text-muted-foreground">
-            {stats.competitiveStats.winPercentage}% win rate
-          </span>
         </motion.div>
         <motion.div
           initial={{ scale: 0, opacity: 0 }}
