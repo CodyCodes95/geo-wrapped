@@ -44,9 +44,18 @@ const Markers = () => {
     return selectedRounds.map(
       () =>
         new mapsLib.Polyline({
-          strokeColor: "black",
-          strokeOpacity: 1.0,
-          strokeWeight: 2,
+          strokeOpacity: 0,
+          icons: [
+            {
+              icon: {
+                path: "M 0,-1 0,1",
+                strokeOpacity: 1,
+                scale: 3,
+              },
+              offset: "0",
+              repeat: "20px",
+            },
+          ],
         }),
     );
   }, [mapsLib, selectedRounds.length]);

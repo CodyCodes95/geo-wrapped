@@ -88,7 +88,7 @@ export const wrappedRouter = createTRPCRouter({
           gameMode: games.mode,
           points: games.totalPoints,
           mapName: games.mapName,
-          summaryId: games.gameId,
+          summaryId: games.geoguessrGameId,
         })
         .from(games)
         .where(and(eq(games.playerId, playerId), isNotNull(games.totalPoints)))

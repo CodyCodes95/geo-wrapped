@@ -249,7 +249,7 @@ export const gameRouter = createTRPCRouter({
         point_count: number;
         cluster: boolean;
       }>({
-        radius: 50,
+        radius: 60,
         minZoom: 2,
         maxZoom: 20,
         // @ts-expect-error: bad types on supercluster lib
