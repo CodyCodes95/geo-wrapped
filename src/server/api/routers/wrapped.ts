@@ -327,18 +327,25 @@ export const wrappedRouter = createTRPCRouter({
     .query(async ({ input, ctx }) => {
       const { playerId } = input;
 
-      const duelStats = await ctx.db
+      const duelStatsQuery = ctx.db
         .select({
           totalDuels: countDistinct(games.gameId),
           totalDuelsWon: sql<number>`count(case when ${games.wonDuel} then 1 end)`,
-          averageScore: avg(games.totalPoints),
           flawlessVictories: sql<number>`count(case when ${games.isFlawLess} then 1 end)`,
         })
         .from(games)
         .where(and(eq(games.playerId, playerId), eq(games.type, "Duel")));
 
+      const averageDuelScoreQuery = ctx.db
+        .select({
+          averageScore: avg(rounds.points),
+        })
+        .from(rounds)
+        .where(and(eq(games.playerId, playerId), eq(games.type, "Duel")))
+        .innerJoin(games, eq(rounds.gameId, games.gameId));
+
       // Top 3 toughest won duels
-      const toughestWonDuels = await ctx.db
+      const toughestWonDuelsQuery = ctx.db
         .select({
           gameId: games.gameId,
           mapName: games.mapName,
@@ -359,6 +366,10 @@ export const wrappedRouter = createTRPCRouter({
         .orderBy(desc(count(rounds.roundId)), desc(games.totalPoints))
         .limit(3);
 
+      const [duelStats, averageDuelScore, toughestWonDuels] = await Promise.all(
+        [duelStatsQuery, averageDuelScoreQuery, toughestWonDuelsQuery],
+      );
+
       const stats = duelStats[0];
       if (!stats) throw new Error("No duel stats found");
 
@@ -369,7 +380,7 @@ export const wrappedRouter = createTRPCRouter({
           (Number(stats.totalDuelsWon) / Number(stats.totalDuels)) * 100,
         ),
         flawlessVictories: Number(stats.flawlessVictories),
-        avgScore: Math.round(Number(stats.averageScore)),
+        avgScore: Math.round(Number(averageDuelScore[0]?.averageScore)),
         toughestWonDuels: toughestWonDuels.map((duel) => ({
           mapName: duel.mapName,
           roundCount: Number(duel.roundCount),
