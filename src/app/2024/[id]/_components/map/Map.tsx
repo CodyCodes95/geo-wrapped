@@ -33,7 +33,7 @@ const Map = () => {
         mapId={env.NEXT_PUBLIC_GOOGLE_MAP_ID}
         style={{ width: "100%", height: "60vh" }}
         defaultCenter={{ lat: 22.54992, lng: 0 }}
-        defaultZoom={2}
+        defaultZoom={3}
         minZoom={2}
         gestureHandling={"greedy"}
         disableDefaultUI={true}
