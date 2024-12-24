@@ -34,8 +34,7 @@ export const ProcessingSlide = () => (
       className="mt-12 text-muted-foreground"
     >
       <p>
-        Processing your rounds can take a while. Estimation is 10 minutes per
-        500 games played.
+        We have a large backlog of games to process. Estimated time for your wrapped to be ready is ~4 hours
       </p>
     </motion.div>
   </motion.div>
