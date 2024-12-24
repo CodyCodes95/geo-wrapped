@@ -25,9 +25,9 @@ const Dashboard = () => {
           <Map />
         </CardContent>
       </Card>
-      <Tabs defaultValue="games" className="space-y-4">
+      <Tabs defaultValue="rounds" className="space-y-4">
         <TabsList>
-          <TabsTrigger value="games">Games</TabsTrigger>
+          {/* <TabsTrigger value="games">Games</TabsTrigger> */}
           <TabsTrigger value="rounds">Rounds</TabsTrigger>
         </TabsList>
 

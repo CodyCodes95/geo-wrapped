@@ -66,7 +66,7 @@ export const RoundTable = () => {
     },
     {
       enabled: !!playerId,
-      // placeholderData: keepPreviousData
+      placeholderData: keepPreviousData
     },
   );
 
