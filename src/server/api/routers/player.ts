@@ -13,4 +13,15 @@ export const playerRouter = createTRPCRouter({
       });
       return player;
     }),
+
+  addEmailNotification: publicProcedure
+    .input(z.object({ playerId: z.string(), email: z.string().email() }))
+    .mutation(async ({ input, ctx }) => {
+      await ctx.db
+        .update(players)
+        .set({ email: input.email })
+        .where(eq(players.playerId, input.playerId));
+
+      return { success: true };
+    }),
 });

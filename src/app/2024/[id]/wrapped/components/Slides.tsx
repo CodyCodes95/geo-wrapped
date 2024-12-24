@@ -12,34 +12,87 @@ import { getCountryName } from "~/utils/countryCodes";
 import { type WrappedStats } from "../page";
 import { ExternalLinkIcon } from "lucide-react";
 import Link from "next/link";
+import { api } from "~/trpc/react";
+import { Input } from "~/components/ui/input";
+import { Button } from "~/components/ui/button";
+import { toast } from "sonner";
 
 type Props = {
   stats: WrappedStats;
 };
 
-export const ProcessingSlide = () => (
-  <motion.div
-    initial={{ opacity: 0 }}
-    animate={{ opacity: 1 }}
-    className="flex min-h-screen flex-col items-center justify-center bg-[#191414] text-center"
-  >
-    <h1 className="text-5xl text-primary">
-      We are processing your data. Save this link and come back soon to see the
-      results!
-    </h1>
+export const ProcessingSlide = ({ playerId }: { playerId: string }) => {
+  const [email, setEmail] = useState("");
+
+  const player = api.players.getPlayer.useQuery({ id: playerId });
+  const addEmail = api.players.addEmailNotification.useMutation({
+    onSuccess: () => {
+      toast.success("We'll email you when your wrapped is ready.");
+      void player.refetch();
+    },
+    onError: () => {
+      toast.error("Something went wrong. Please try again.");
+    },
+  });
+
+  const handleSubmit = (e: React.FormEvent) => {
+    e.preventDefault();
+    addEmail.mutate({ playerId, email });
+  };
+
+  return (
     <motion.div
-      initial={{ opacity: 0, y: 20 }}
-      animate={{ opacity: 1, y: 0 }}
-      transition={{ delay: 0.5 }}
-      className="mt-12 text-muted-foreground"
+      initial={{ opacity: 0 }}
+      animate={{ opacity: 1 }}
+      className="flex min-h-screen flex-col items-center justify-center bg-[#191414] p-8 text-center"
     >
-      <p>
-        We have a large backlog of games to process. Estimated time for your
-        wrapped to be ready is ~4 hours
-      </p>
+      <h1 className="text-5xl text-primary">
+        We are processing your data. Save this link and come back soon to see
+        the results!
+      </h1>
+      <motion.div
+        initial={{ opacity: 0, y: 20 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ delay: 0.5 }}
+        className="mt-12 max-w-2xl text-muted-foreground"
+      >
+        <p className="mb-8">
+          Thank you for checking out GeoWrapped! {"We're"} currently overwhelmed
+          with the amazing response and processing is taking longer than
+          expected. The estimated time for your wrapped to be ready is ~4 hours.
+        </p>
+
+        {player.data?.email ? (
+          <div className="rounded-lg border border-primary/20 p-6">
+            <p className="text-primary">
+              {"We'll"} send you an email at {player.data.email} once your
+              wrapped is ready!
+            </p>
+          </div>
+        ) : (
+          <form onSubmit={handleSubmit} className="flex flex-col gap-4">
+            <p className="text-sm">
+              Enter your email to be notified when your wrapped is ready:
+            </p>
+            <div className="flex gap-2">
+              <Input
+                type="email"
+                placeholder="your@email.com"
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
+                required
+                className="max-w-sm"
+              />
+              <Button type="submit" disabled={addEmail.isPending}>
+                {addEmail.isPending ? "Submitting..." : "Notify Me"}
+              </Button>
+            </div>
+          </form>
+        )}
+      </motion.div>
     </motion.div>
-  </motion.div>
-);
+  );
+};
 
 export const WelcomeSlide = () => (
   <motion.div
@@ -47,7 +100,7 @@ export const WelcomeSlide = () => (
     animate={{ opacity: 1 }}
     className="flex min-h-screen flex-col items-center justify-center bg-[#191414] text-center"
   >
-    <h1 className="text-primary text-6xl font-bold">Your 2024 in Geo</h1>
+    <h1 className="text-6xl font-bold text-primary">Your 2024 in Geo</h1>
     <div className="mt-4 text-xl text-primary"></div>
     <motion.div
       initial={{ opacity: 0, y: 20 }}
