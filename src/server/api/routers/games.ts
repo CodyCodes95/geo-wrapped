@@ -253,8 +253,9 @@ export const gameRouter = createTRPCRouter({
     )
     .query(async ({ input, ctx }) => {
       const { start, end } = getMonthTimestampRange(input.selectedMonth);
+      const crossesMeridian = input.bounds.sw.lng > input.bounds.ne.lng;
 
-      // Get raw data
+      // Get raw data with bounds filtering
       const rawData = await ctx.db
         .select({
           roundId: rounds.roundId,
@@ -281,6 +282,19 @@ export const gameRouter = createTRPCRouter({
             lte(games.gameTimeStarted, end),
             not(eq(rounds.guessLat, 0)),
             not(eq(rounds.guessLng, 0)),
+            // Latitude bounds
+            gte(rounds.guessLat, input.bounds.sw.lat),
+            lte(rounds.guessLat, input.bounds.ne.lat),
+            // Longitude bounds with meridian crossing check
+            crossesMeridian
+              ? or(
+                  gte(rounds.guessLng, input.bounds.sw.lng),
+                  lte(rounds.guessLng, input.bounds.ne.lng)
+                )
+              : and(
+                  gte(rounds.guessLng, input.bounds.sw.lng),
+                  lte(rounds.guessLng, input.bounds.ne.lng)
+                )
           ),
         );
 
