@@ -1,11 +1,14 @@
 import {
   and,
+  asc,
   count,
   desc,
   eq,
   gte,
+  like,
   lte,
   not,
+  or,
 } from "drizzle-orm";
 import { z } from "zod";
 import Supercluster from "supercluster";
@@ -132,10 +135,58 @@ export const gameRouter = createTRPCRouter({
       z.object({
         playerId: z.string(),
         selectedMonth: z.union([z.string(), z.null()]),
+        page: z.number().min(1).default(1),
+        limit: z.number().min(1).max(100).default(20),
+        sortField: z.enum(['mapName', 'mode', 'type', 'points', 'distance', 'date', 'result', 'score']).default('date'),
+        sortOrder: z.enum(['asc', 'desc']).default('desc'),
+        search: z.string().optional(),
+        groupByGame: z.boolean().default(false),
       }),
     )
     .query(async ({ input, ctx }) => {
       const { start, end } = getMonthTimestampRange(input.selectedMonth);
+      const offset = (input.page - 1) * input.limit;
+
+      let orderBy;
+      switch (input.sortField) {
+        case 'date':
+          orderBy = input.sortOrder === 'asc' ? asc(games.gameTimeStarted) : desc(games.gameTimeStarted);
+          break;
+        case 'points':
+          orderBy = input.sortOrder === 'asc' ? asc(rounds.points) : desc(rounds.points);
+          break;
+        case 'mapName':
+          orderBy = input.sortOrder === 'asc' ? asc(games.mapName) : desc(games.mapName);
+          break;
+        case 'mode':
+          orderBy = input.sortOrder === 'asc' ? asc(games.mode) : desc(games.mode);
+          break;
+        case 'type':
+          orderBy = input.sortOrder === 'asc' ? asc(games.type) : desc(games.type);
+          break;
+        default:
+          orderBy = desc(games.gameTimeStarted);
+      }
+
+      let whereConditions = and(
+        eq(games.playerId, input.playerId),
+        gte(games.gameTimeStarted, start),
+        lte(games.gameTimeStarted, end),
+        not(eq(rounds.guessLat, 0)),
+        not(eq(rounds.guessLng, 0))
+      );
+
+      if (input.search) {
+        whereConditions = and(
+          whereConditions,
+          or(
+            like(games.mapName, `%${input.search}%`),
+            like(games.mode, `%${input.search}%`),
+            like(games.type, `%${input.search}%`)
+          )
+        );
+      }
+
       const query = await ctx.db
         .select({
           gameId: games.gameId,
@@ -146,7 +197,7 @@ export const gameRouter = createTRPCRouter({
           roundId: rounds.roundId,
           totalPoints: games.totalPoints,
           answer: {
-            answerId: rounds.roundId, // Using roundId as answerId for compatibility
+            answerId: rounds.roundId,
             lat: rounds.answerLat,
             lng: rounds.answerLng,
             countryCode: rounds.answerCountryCode,
@@ -156,7 +207,7 @@ export const gameRouter = createTRPCRouter({
             zoom: rounds.zoom,
           },
           guess: {
-            guessId: rounds.roundId, // Using roundId as guessId for compatibility
+            guessId: rounds.roundId,
             lat: rounds.guessLat,
             lng: rounds.guessLng,
             countryCode: rounds.guessCountryCode,
@@ -170,17 +221,22 @@ export const gameRouter = createTRPCRouter({
         })
         .from(games)
         .innerJoin(rounds, eq(games.gameId, rounds.gameId))
-        .where(
-          and(
-            eq(games.playerId, input.playerId),
-            gte(games.gameTimeStarted, start),
-            lte(games.gameTimeStarted, end),
-            not(eq(rounds.guessLat, 0)),
-            not(eq(rounds.guessLng, 0)),
-          ),
-        );
+        .where(whereConditions)
+        .orderBy(orderBy)
+        .limit(input.limit)
+        .offset(offset);
+      // Get total count for pagination
+      const countQuery = await ctx.db
+        .select({ count: count(games.gameId) })
+        .from(games)
+        .innerJoin(rounds, eq(games.gameId, rounds.gameId))
+        .where(whereConditions);
 
-      return query;
+      return {
+        items: query,
+        total: (countQuery[0]?.count ?? 0),
+        pages: Math.ceil((countQuery[0]?.count ?? 0) / input.limit),
+      };
     }),
 
   getClusteredMarkers: publicProcedure

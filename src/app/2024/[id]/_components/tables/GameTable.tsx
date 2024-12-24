@@ -14,6 +14,8 @@ import { api } from "~/trpc/react";
 import { usePlayerId } from "../dashboard/_hooks/usePlayerId";
 import { useMonth } from "../_layout/MonthSelector";
 import { useMapStore, type SelectedRound } from "~/store/mapStore";
+import { keepPreviousData } from "@tanstack/react-query";
+import { Button } from "~/components/ui/button";
 
 type SortField = "mapName" | "type" | "mode" | "score" | "date" | "result";
 type SortOrder = "asc" | "desc";
@@ -27,21 +29,27 @@ export const GameTable = () => {
   const playerId = usePlayerId()!;
   const { selectedMonth } = useMonth();
   const { setSelectedRounds } = useMapStore();
-  const { data: games } = api.games.getAllWithResults.useQuery(
-    { playerId, selectedMonth },
-    { enabled: !!playerId },
+
+  const { data } = api.games.getAllWithResults.useQuery(
+    {
+      playerId,
+      selectedMonth,
+      page,
+      limit: itemsPerPage,
+      sortField,
+      sortOrder,
+      search,
+      groupByGame: true,
+    },
+    {
+      enabled: !!playerId,
+      // placeholderData: keepPreviousData
+    },
   );
 
-  if (!games?.length) {
+  if (!data?.items.length) {
     return <div>No games found</div>;
   }
-
-  const groupedGames = games.reduce((acc, round) => {
-    const game = acc.get(round.gameId) ?? [];
-    game.push(round);
-    acc.set(round.gameId, game);
-    return acc;
-  }, new Map<string, typeof games>());
 
   const handleSort = (field: SortField) => {
     if (sortField === field) {
@@ -61,60 +69,12 @@ export const GameTable = () => {
     );
   };
 
-  const isDuelGame = (game: (typeof games)[0]) => game.type === "Duel";
+  const isDuelGame = (game: (typeof data.items)[0]) => game.type === "Duel";
 
-  const getGameResult = (rounds: typeof games) => {
-    if (!isDuelGame(rounds[0]!)) return null;
-    const lastRound = rounds[rounds.length - 1];
-    return lastRound!.guess.healthAfter === 0 ? "L" : "W";
+  const getGameResult = (game: (typeof data.items)[0]) => {
+    if (!isDuelGame(game)) return null;
+    return game.guess.healthAfter === 0 ? "L" : "W";
   };
-
-  const groupedAndSortedGames = Array.from(groupedGames.entries())
-    .filter(([_, rounds]) => {
-      const game = rounds[0];
-      return Object.values(game!).some((value) =>
-        // eslint-disable-next-line @typescript-eslint/no-base-to-string
-        String(value).toLowerCase().includes(search.toLowerCase()),
-      );
-    })
-    .sort(([, a], [, b]) => {
-      const gameA = a[0];
-      const gameB = b[0];
-      const modifier = sortOrder === "asc" ? 1 : -1;
-
-      switch (sortField) {
-        case "date":
-          return (
-            (gameA!.gameTimeStarted.getTime() -
-              gameB!.gameTimeStarted.getTime()) *
-            modifier
-          );
-        case "score":
-          return (
-            (gameA!.totalPoints ?? 0) - (gameB!.totalPoints ?? 0), modifier
-          );
-        default:
-          if (
-            sortField === "mapName" ||
-            sortField === "type" ||
-            sortField === "mode"
-          ) {
-            return (
-              String(gameA![sortField]).localeCompare(
-                String(gameB![sortField]),
-              ) * modifier
-            );
-          }
-          return 0;
-      }
-    });
-
-  const paginatedGames = groupedAndSortedGames.slice(
-    (page - 1) * itemsPerPage,
-    page * itemsPerPage,
-  );
-
-  const totalPages = Math.ceil(groupedAndSortedGames.length / itemsPerPage);
 
   return (
     <div className="space-y-4">
@@ -156,57 +116,57 @@ export const GameTable = () => {
           </TableRow>
         </TableHeader>
         <TableBody>
-          {paginatedGames.map(([gameId, rounds]) => {
-            const game = rounds[0];
-            const isDuel = isDuelGame(game!);
-            return (
-              <TableRow
-                key={gameId}
-                className="cursor-pointer hover:bg-muted"
-                onClick={() => {
-                  const selectedRounds: SelectedRound[] = rounds.map((r) => ({
-                    id: r.roundId,
-                    guess: {
-                      lat: r.guess.lat,
-                      lng: r.guess.lng,
-                    },
-                    answer: r.answer,
-                  }));
-                  setSelectedRounds(selectedRounds);
-                  window.scrollTo({ top: 350, behavior: "smooth" });
-                }}
-              >
-                <TableCell>{game?.mapName}</TableCell>
-                <TableCell>{game?.type}</TableCell>
-                <TableCell>{game?.mode}</TableCell>
-                <TableCell>{!isDuel ? game?.totalPoints : "-"}</TableCell>
-                <TableCell>{isDuel ? getGameResult(rounds) : "-"}</TableCell>
-                <TableCell>
-                  {new Date(game?.gameTimeStarted ?? "").toLocaleString()}
-                </TableCell>
-              </TableRow>
-            );
-          })}
+          {data.items.map((game) => (
+            <TableRow
+              key={game.gameId}
+              className="cursor-pointer hover:bg-muted"
+              onClick={() => {
+                const selectedRound: SelectedRound = {
+                  id: game.roundId,
+                  guess: {
+                    lat: game.guess.lat,
+                    lng: game.guess.lng,
+                  },
+                  answer: game.answer,
+                };
+                setSelectedRounds([selectedRound]);
+                window.scrollTo({ top: 350, behavior: "smooth" });
+              }}
+            >
+              <TableCell>{game.mapName}</TableCell>
+              <TableCell>{game.type}</TableCell>
+              <TableCell>{game.mode}</TableCell>
+              <TableCell>
+                {!isDuelGame(game) ? game.totalPoints : "-"}
+              </TableCell>
+              <TableCell>
+                {isDuelGame(game) ? getGameResult(game) : "-"}
+              </TableCell>
+              <TableCell>
+                {new Date(game.gameTimeStarted).toLocaleString()}
+              </TableCell>
+            </TableRow>
+          ))}
         </TableBody>
       </Table>
       <div className="flex justify-center gap-2">
-        <button
+        <Button
           onClick={() => setPage((p) => Math.max(1, p - 1))}
           disabled={page === 1}
-          className="px-3 py-2 disabled:opacity-50"
+          className="disabled:opacity-50"
         >
           Previous
-        </button>
+        </Button>
         <span className="px-3 py-2">
-          Page {page} of {totalPages}
+          Page {page} of {data.pages}
         </span>
-        <button
-          onClick={() => setPage((p) => Math.min(totalPages, p + 1))}
-          disabled={page === totalPages}
-          className="px-3 py-2 disabled:opacity-50"
+        <Button
+          onClick={() => setPage((p) => Math.min(data.pages, p + 1))}
+          disabled={page === data.pages}
+          className="disabled:opacity-50"
         >
           Next
-        </button>
+        </Button>
       </div>
     </div>
   );

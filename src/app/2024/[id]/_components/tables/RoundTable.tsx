@@ -14,6 +14,8 @@ import { api } from "~/trpc/react";
 import { usePlayerId } from "../dashboard/_hooks/usePlayerId";
 import { useMonth } from "../_layout/MonthSelector";
 import { useMapStore, type SelectedRound } from "~/store/mapStore";
+import { keepPreviousData } from "@tanstack/react-query";
+import { Button } from "~/components/ui/button";
 
 const getDistanceInKm = (
   lat1: number,
@@ -50,12 +52,25 @@ export const RoundTable = () => {
   const playerId = usePlayerId()!;
   const { selectedMonth } = useMonth();
   const { setSelectedRounds } = useMapStore();
-  const { data: rounds } = api.games.getAllWithResults.useQuery(
-    { playerId, selectedMonth },
-    { enabled: !!playerId },
+
+  const { data } = api.games.getAllWithResults.useQuery(
+    {
+      playerId,
+      selectedMonth,
+      page,
+      limit: itemsPerPage,
+      sortField,
+      sortOrder,
+      search,
+      groupByGame: false,
+    },
+    {
+      enabled: !!playerId,
+      // placeholderData: keepPreviousData
+    },
   );
 
-  if (!rounds?.length) {
+  if (!data?.items.length) {
     return <div>No rounds found</div>;
   }
 
@@ -68,39 +83,14 @@ export const RoundTable = () => {
     }
   };
 
-  const filteredAndSortedRounds = rounds
-    .filter((round) =>
-      Object.values(round).some((value) =>
-        // eslint-disable-next-line @typescript-eslint/no-base-to-string
-        String(value).toLowerCase().includes(search.toLowerCase())
-      )
-    )
-    .sort((a, b) => {
-      const modifier = sortOrder === "asc" ? 1 : -1;
-      switch (sortField) {
-        case "date":
-          return (a.gameTimeStarted.getTime() - b.gameTimeStarted.getTime()) * modifier;
-        case "points":
-          return (a.guess.points - b.guess.points) * modifier;
-        case "distance":
-          return (getDistanceInKm(a.guess.lat, a.guess.lng, a.answer.lat, a.answer.lng) -
-            getDistanceInKm(b.guess.lat, b.guess.lng, b.answer.lat, b.answer.lng)) * modifier;
-        default:
-          return String(a[sortField]).localeCompare(String(b[sortField])) * modifier;
-      }
-    });
-
   const SortIcon = ({ field }: { field: SortField }) => {
     if (sortField !== field) return null;
-    return sortOrder === "asc" ? <ChevronUp className="inline h-4 w-4" /> : <ChevronDown className="inline h-4 w-4" />;
+    return sortOrder === "asc" ? (
+      <ChevronUp className="inline h-4 w-4" />
+    ) : (
+      <ChevronDown className="inline h-4 w-4" />
+    );
   };
-
-  const paginatedRounds = filteredAndSortedRounds.slice(
-    (page - 1) * itemsPerPage,
-    page * itemsPerPage
-  );
-
-  const totalPages = Math.ceil(filteredAndSortedRounds.length / itemsPerPage);
 
   return (
     <div className="space-y-4">
@@ -149,7 +139,7 @@ export const RoundTable = () => {
           </TableRow>
         </TableHeader>
         <TableBody>
-          {paginatedRounds.map((round) => (
+          {data.items.map((round) => (
             <TableRow
               key={round.roundId}
               className="cursor-pointer hover:bg-muted"
@@ -188,23 +178,23 @@ export const RoundTable = () => {
         </TableBody>
       </Table>
       <div className="flex justify-center gap-2">
-        <button
+        <Button
           onClick={() => setPage((p) => Math.max(1, p - 1))}
           disabled={page === 1}
-          className="px-3 py-2 disabled:opacity-50"
+          className="disabled:opacity-50"
         >
           Previous
-        </button>
+        </Button>
         <span className="px-3 py-2">
-          Page {page} of {totalPages}
+          Page {page} of {data.pages}
         </span>
-        <button
-          onClick={() => setPage((p) => Math.min(totalPages, p + 1))}
-          disabled={page === totalPages}
-          className="px-3 py-2 disabled:opacity-50"
+        <Button
+          onClick={() => setPage((p) => Math.min(data.pages, p + 1))}
+          disabled={page === data.pages}
+          className="disabled:opacity-50"
         >
           Next
-        </button>
+        </Button>
       </div>
     </div>
   );
