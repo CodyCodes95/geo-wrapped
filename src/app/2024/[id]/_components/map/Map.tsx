@@ -8,7 +8,6 @@ import { useMapStateStore } from "~/store/mapStateStore";
 const Map = () => {
   const updateBoundsAndZoom = (map: google.maps.Map) => {
     const bounds = map.getBounds();
-    console.log(bounds);
     const zoom = map.getZoom();
     if (bounds && zoom) {
       useMapStateStore.setState({
