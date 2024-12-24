@@ -70,7 +70,7 @@ export const ProcessingSlide = ({ playerId }: { playerId: string }) => {
             </p>
           </div>
         ) : (
-          <form onSubmit={handleSubmit} className="flex flex-col gap-4">
+          <form onSubmit={handleSubmit} className="flex flex-col gap-4 items-center">
             <p className="text-sm">
               Enter your email to be notified when your wrapped is ready:
             </p>
