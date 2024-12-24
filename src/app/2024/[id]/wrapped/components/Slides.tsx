@@ -59,7 +59,7 @@ export const ProcessingSlide = ({ playerId }: { playerId: string }) => {
         <p className="mb-8">
           Thank you for checking out GeoWrapped! {"We're"} currently overwhelmed
           with the amazing response and processing is taking longer than
-          expected. The estimated time for your wrapped to be ready is ~4 hours.
+          expected.
         </p>
 
         {player.data?.email ? (
