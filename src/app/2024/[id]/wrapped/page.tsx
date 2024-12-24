@@ -107,7 +107,7 @@ export default async function Page({
   }
 
   if (!player.processed) {
-    return <ProcessingSlide />;
+    return <ProcessingSlide playerId={id} />;
   }
 
   const strongestCountriesQuery = api.wrapped.strongestCountries({
