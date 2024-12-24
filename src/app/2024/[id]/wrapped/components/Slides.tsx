@@ -34,7 +34,8 @@ export const ProcessingSlide = () => (
       className="mt-12 text-muted-foreground"
     >
       <p>
-        We have a large backlog of games to process. Estimated time for your wrapped to be ready is ~4 hours
+        We have a large backlog of games to process. Estimated time for your
+        wrapped to be ready is ~4 hours
       </p>
     </motion.div>
   </motion.div>
@@ -46,9 +47,7 @@ export const WelcomeSlide = () => (
     animate={{ opacity: 1 }}
     className="flex min-h-screen flex-col items-center justify-center bg-[#191414] text-center"
   >
-    <h1 className="bg-gradient-to-r from-primary to-[#15cf4b] bg-clip-text text-6xl font-bold text-transparent">
-      Your 2024 in Geo
-    </h1>
+    <h1 className="from-primary text-6xl">Your 2024 in Geo</h1>
     <div className="mt-4 text-xl text-primary"></div>
     <motion.div
       initial={{ opacity: 0, y: 20 }}
