@@ -207,7 +207,11 @@ export const wrappedRouter = createTRPCRouter({
           ),
         );
       return query
-        .filter((row) => row.totalGuesses > 10)
+        .filter((row) =>
+          query.filter((row2) => row2.totalGuesses > 10).length > 4
+            ? row.totalGuesses > 10
+            : true,
+        )
         .sort((a, b) => b.percentage - a.percentage)
         .slice(0, 20);
     }),
@@ -269,7 +273,11 @@ export const wrappedRouter = createTRPCRouter({
           ),
         );
       return query
-        .filter((row) => row.totalGuesses > 10)
+        .filter((row) =>
+          query.filter((row2) => row2.totalGuesses > 10).length > 4
+            ? row.totalGuesses > 10
+            : true,
+        )
         .sort((a, b) => a.percentage - b.percentage)
         .slice(0, 20);
     }),
