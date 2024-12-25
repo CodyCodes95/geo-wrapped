@@ -70,7 +70,10 @@ export const ProcessingSlide = ({ playerId }: { playerId: string }) => {
             </p>
           </div>
         ) : (
-          <form onSubmit={handleSubmit} className="flex flex-col gap-4 items-center">
+          <form
+            onSubmit={handleSubmit}
+            className="flex flex-col items-center gap-4"
+          >
             <p className="text-sm">
               Enter your email to be notified when your wrapped is ready:
             </p>
@@ -313,6 +316,19 @@ export const ScoreSlide = ({ stats }: Props) => {
 };
 
 export const CompteitivePerformanceSlide = ({ stats }: Props) => {
+  if (!stats.competitiveStats.totalDuels) {
+    return (
+      <div className="flex min-h-screen flex-col items-center justify-center gap-8 bg-[#191414] p-4">
+        <motion.h1
+          initial={{ opacity: 0, y: -20 }}
+          animate={{ opacity: 1, y: 0 }}
+          className="text-4xl font-bold text-primary"
+        >
+          No competitive stats recorded
+        </motion.h1>
+      </div>
+    );
+  }
   return (
     <div className="flex min-h-screen flex-col items-center justify-center gap-8 bg-[#191414] p-4">
       <motion.h1
