@@ -16,6 +16,7 @@ import { useMonth } from "../_layout/MonthSelector";
 import { useMapStore, type SelectedRound } from "~/store/mapStore";
 import { keepPreviousData } from "@tanstack/react-query";
 import { Button } from "~/components/ui/button";
+import { getCountryName } from "~/utils/countryCodes";
 
 const getDistanceInKm = (
   lat1: number,
@@ -66,7 +67,7 @@ export const RoundTable = () => {
     },
     {
       enabled: !!playerId,
-      placeholderData: keepPreviousData
+      placeholderData: keepPreviousData,
     },
   );
 
@@ -160,7 +161,9 @@ export const RoundTable = () => {
               <TableCell>{round.mode}</TableCell>
               <TableCell>{round.type}</TableCell>
               <TableCell>{round.guess.points}</TableCell>
-              <TableCell>{round.guess.countryCode?.toUpperCase()}</TableCell>
+              <TableCell>
+                {getCountryName(round.guess.countryCode?.toUpperCase())}
+              </TableCell>
               <TableCell>{round.answer.countryCode.toUpperCase()}</TableCell>
               <TableCell>
                 {getDistanceInKm(

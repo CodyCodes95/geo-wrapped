@@ -247,9 +247,9 @@ export const countryCodes = {
   ZW: "Zimbabwe",
 };
 
-export const getCountryName = (countryCode: string) => {
+export const getCountryName = (countryCode: string | undefined) => {
   return (
-    countryCodes[countryCode.toUpperCase() as keyof typeof countryCodes] ??
+    countryCodes[countryCode?.toUpperCase() as keyof typeof countryCodes] ??
     "Unknown"
   );
 };
