@@ -1,5 +1,6 @@
 "use client";
 import { CheckIcon, CopyIcon } from "lucide-react";
+import { useRouter } from "next/navigation";
 import React, { useState } from "react";
 import { toast } from "sonner";
 import { Card, CardContent, CardTitle } from "~/components/ui/card";
@@ -14,6 +15,8 @@ const Upload = () => {
     setCopied(true);
     setTimeout(() => setCopied(false), 2000);
   };
+
+  const router = useRouter();
 
   if (wrappedUrl) {
     return (
@@ -53,7 +56,8 @@ const Upload = () => {
       endpoint="geoDataUploader"
       onClientUploadComplete={(res) => {
         // Do something with the response
-        setWrappedUrl(`${window.location.origin}${res[0]!.serverData.url}`);
+        // setWrappedUrl(`${window.location.origin}${res[0]!.serverData.url}`);
+        router.push(res[0]!.serverData.url);
       }}
       onUploadError={(error: Error) => {
         toast.error(
