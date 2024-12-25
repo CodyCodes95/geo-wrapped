@@ -296,7 +296,7 @@ export const gameRouter = createTRPCRouter({
                   lte(rounds.guessLng, input.bounds.ne.lng)
                 )
           ),
-        );
+        ).limit(20000)
 
       // Convert to GeoJSON features
       const features = rawData.map((round) => ({
@@ -322,7 +322,7 @@ export const gameRouter = createTRPCRouter({
       }>({
         radius: 55,
         minZoom: 2,
-        maxZoom: 5,
+        maxZoom: 6,
         // @ts-expect-error: bad types on supercluster lib
       }).load(features);
 
