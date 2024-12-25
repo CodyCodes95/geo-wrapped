@@ -164,7 +164,9 @@ export const RoundTable = () => {
               <TableCell>
                 {getCountryName(round.guess.countryCode?.toUpperCase())}
               </TableCell>
-              {getCountryName(round.answer.countryCode?.toUpperCase())}
+              <TableCell>
+                {getCountryName(round.answer.countryCode?.toUpperCase())}
+              </TableCell>
               <TableCell>
                 {getDistanceInKm(
                   round.guess.lat,
