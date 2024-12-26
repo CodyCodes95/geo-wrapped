@@ -137,8 +137,19 @@ export const gameRouter = createTRPCRouter({
         selectedMonth: z.union([z.string(), z.null()]),
         page: z.number().min(1).default(1),
         limit: z.number().min(1).max(100).default(20),
-        sortField: z.enum(['mapName', 'mode', 'type', 'points', 'distance', 'date', 'result', 'score']).default('date'),
-        sortOrder: z.enum(['asc', 'desc']).default('desc'),
+        sortField: z
+          .enum([
+            "mapName",
+            "mode",
+            "type",
+            "points",
+            "distance",
+            "date",
+            "result",
+            "score",
+          ])
+          .default("date"),
+        sortOrder: z.enum(["asc", "desc"]).default("desc"),
         search: z.string().optional(),
         groupByGame: z.boolean().default(false),
       }),
@@ -149,20 +160,31 @@ export const gameRouter = createTRPCRouter({
 
       let orderBy;
       switch (input.sortField) {
-        case 'date':
-          orderBy = input.sortOrder === 'asc' ? asc(games.gameTimeStarted) : desc(games.gameTimeStarted);
+        case "date":
+          orderBy =
+            input.sortOrder === "asc"
+              ? asc(games.gameTimeStarted)
+              : desc(games.gameTimeStarted);
           break;
-        case 'points':
-          orderBy = input.sortOrder === 'asc' ? asc(rounds.points) : desc(rounds.points);
+        case "points":
+          orderBy =
+            input.sortOrder === "asc"
+              ? asc(rounds.points)
+              : desc(rounds.points);
           break;
-        case 'mapName':
-          orderBy = input.sortOrder === 'asc' ? asc(games.mapName) : desc(games.mapName);
+        case "mapName":
+          orderBy =
+            input.sortOrder === "asc"
+              ? asc(games.mapName)
+              : desc(games.mapName);
           break;
-        case 'mode':
-          orderBy = input.sortOrder === 'asc' ? asc(games.mode) : desc(games.mode);
+        case "mode":
+          orderBy =
+            input.sortOrder === "asc" ? asc(games.mode) : desc(games.mode);
           break;
-        case 'type':
-          orderBy = input.sortOrder === 'asc' ? asc(games.type) : desc(games.type);
+        case "type":
+          orderBy =
+            input.sortOrder === "asc" ? asc(games.type) : desc(games.type);
           break;
         default:
           orderBy = desc(games.gameTimeStarted);
@@ -173,7 +195,7 @@ export const gameRouter = createTRPCRouter({
         gte(games.gameTimeStarted, start),
         lte(games.gameTimeStarted, end),
         not(eq(rounds.guessLat, 0)),
-        not(eq(rounds.guessLng, 0))
+        not(eq(rounds.guessLng, 0)),
       );
 
       if (input.search) {
@@ -182,8 +204,10 @@ export const gameRouter = createTRPCRouter({
           or(
             like(games.mapName, `%${input.search}%`),
             like(games.mode, `%${input.search}%`),
-            like(games.type, `%${input.search}%`)
-          )
+            like(games.type, `%${input.search}%`),
+            like(rounds.guessCountryCode, `%${input.search}%`),
+            like(rounds.answerCountryCode, `%${input.search}%`),
+          ),
         );
       }
 
@@ -234,7 +258,7 @@ export const gameRouter = createTRPCRouter({
 
       return {
         items: query,
-        total: (countQuery[0]?.count ?? 0),
+        total: countQuery[0]?.count ?? 0,
         pages: Math.ceil((countQuery[0]?.count ?? 0) / input.limit),
       };
     }),
@@ -289,14 +313,15 @@ export const gameRouter = createTRPCRouter({
             crossesMeridian
               ? or(
                   gte(rounds.guessLng, input.bounds.sw.lng),
-                  lte(rounds.guessLng, input.bounds.ne.lng)
+                  lte(rounds.guessLng, input.bounds.ne.lng),
                 )
               : and(
                   gte(rounds.guessLng, input.bounds.sw.lng),
-                  lte(rounds.guessLng, input.bounds.ne.lng)
-                )
+                  lte(rounds.guessLng, input.bounds.ne.lng),
+                ),
           ),
-        ).limit(20000)
+        )
+        .limit(20000);
 
       // Convert to GeoJSON features
       const features = rawData.map((round) => ({
