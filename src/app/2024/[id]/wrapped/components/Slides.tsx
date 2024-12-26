@@ -97,6 +97,7 @@ export const ProcessingSlide = ({ playerId }: { playerId: string }) => {
   );
 };
 
+
 export const WelcomeSlide = () => (
   <motion.div
     initial={{ opacity: 0 }}
