@@ -205,6 +205,7 @@ export const gameRouter = createTRPCRouter({
             like(games.mapName, `%${input.search}%`),
             like(games.mode, `%${input.search}%`),
             like(games.type, `%${input.search}%`),
+            eq(games.totalPoints, Number(input.search)),
             like(rounds.guessCountryCode, `%${input.search}%`),
             like(rounds.answerCountryCode, `%${input.search}%`),
           ),
