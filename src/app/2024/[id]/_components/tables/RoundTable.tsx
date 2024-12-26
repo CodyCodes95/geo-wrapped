@@ -72,7 +72,12 @@ export const RoundTable = () => {
   );
 
   if (!data?.items.length) {
-    return <div>No rounds found</div>;
+    return (
+      <div className="space-y-4">
+        <Search value={search} onChange={setSearch} />
+        <div>No rounds found</div>
+      </div>
+    );
   }
 
   const handleSort = (field: SortField) => {
